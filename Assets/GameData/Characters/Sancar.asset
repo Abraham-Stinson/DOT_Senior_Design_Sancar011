@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 21deb212199bcef40a60794c63c83329, type: 3}
+  m_Name: Sancar
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterData
+  characterID: sancar
+  displayName: Sancar
+  description: "Ana karakter; Story Mode'un oynanabilir d\xF6v\xFC\u015F\xE7\xFCs\xFC"
+  portrait: {fileID: 0}
+  fighterPrefab: {fileID: 494333029108147222, guid: 07e706984c78dd343a60a386811ecfb2, type: 3}
+  animatorController: {fileID: 9100000, guid: ab5415274ee9b644898f5a41519cd8cd, type: 2}
+  idleAnimatorStateName: Sancar_Idle
+  maxHealth: 1000
+  movementSpeed: 3
+  lightPunch: {fileID: 11400000, guid: 164d148a548c9684ca1848ae5c563adb, type: 2}
+  heavyPunch: {fileID: 11400000, guid: ef38928929ea0954d85beee85503dc46, type: 2}
+  lightKick: {fileID: 11400000, guid: 482ba0f5d776ecc41b3544fb201b2835, type: 2}
+  heavyKick: {fileID: 11400000, guid: 73f68ac2c8c59f54ba8b5101b33301cd, type: 2}
