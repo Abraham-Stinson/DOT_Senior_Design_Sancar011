@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f223cdf9ce100943a306e85da7fce1b, type: 3}
   m_Name: FirstMap
   m_EditorClassIdentifier: Assembly-CSharp::MapData
-  mapID: 
-  displayName: 
+  mapID: 1
+  displayName: MidTown
   mapPortrait: {fileID: 0}
   arenaPrefab: {fileID: 0}
