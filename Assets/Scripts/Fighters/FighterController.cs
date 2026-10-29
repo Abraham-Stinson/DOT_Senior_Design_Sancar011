@@ -1,4 +1,4 @@
-
+using System;
 using UnityEngine;
 
 public enum FighterControlType
@@ -18,8 +18,9 @@ public class FighterController : MonoBehaviour
     [SerializeField] private Transform visualRoot;
 
     [Header("Control Source")]
-    [SerializeField] private FighterControlType controlType =
-        FighterControlType.Player1;
+    [SerializeField] private FighterControlType controlType = FighterControlType.Player1;
+
+    public event Action<int, int> OnHealthChanged;
 
     // Runtime data: each fighter has its own values.
     private int currentHealth;
