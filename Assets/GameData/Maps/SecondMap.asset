@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7f223cdf9ce100943a306e85da7fce1b, type: 3}
+  m_Name: SecondMap
+  m_EditorClassIdentifier: Assembly-CSharp::MapData
+  mapID: 2
+  displayName: "HadiBal\u0131k"
+  mapPortrait: {fileID: 1058525918055622259, guid: d8fb04b9f99b25a459649053ec687044, type: 3}
+  arenaPrefab: {fileID: 5551002520122876218, guid: d207500e1f5b9144eb883aaed3fe4982, type: 3}

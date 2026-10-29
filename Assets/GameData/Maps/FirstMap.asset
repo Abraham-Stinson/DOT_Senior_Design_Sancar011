@@ -14,5 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MapData
   mapID: 1
   displayName: MidTown
-  mapPortrait: {fileID: 0}
-  arenaPrefab: {fileID: 0}
+  mapPortrait: {fileID: 1472453544262575493, guid: 9fa88a150637cce43b60d534ae7866d7, type: 3}
+  arenaPrefab: {fileID: 5551002520122876218, guid: d207500e1f5b9144eb883aaed3fe4982, type: 3}

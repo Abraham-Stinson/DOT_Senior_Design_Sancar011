@@ -297,6 +297,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 577703027}
     - target: {fileID: 1908458169990662955, guid: 5921f50008ad5264b998d42f719d7a10, type: 3}
+      propertyPath: pvpMapSelectionScreenUI
+      value: 
+      objectReference: {fileID: 1953386826}
+    - target: {fileID: 1908458169990662955, guid: 5921f50008ad5264b998d42f719d7a10, type: 3}
       propertyPath: playModeSelectionScreenUI
       value: 
       objectReference: {fileID: 577703028}
@@ -514,6 +518,7 @@ GameObject:
   - component: {fileID: 371799713}
   - component: {fileID: 371799712}
   - component: {fileID: 371799711}
+  - component: {fileID: 371799714}
   m_Layer: 5
   m_Name: Map
   m_TagString: Untagged
@@ -592,6 +597,30 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 371799709}
   m_CullTransparentMesh: 1
+--- !u!114 &371799714
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 371799709}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a8695521f0d02e499659fee002a26c2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.GridLayoutGroup
+  m_Padding:
+    m_Left: 0
+    m_Right: 0
+    m_Top: 0
+    m_Bottom: 0
+  m_ChildAlignment: 0
+  m_StartCorner: 0
+  m_StartAxis: 0
+  m_CellSize: {x: 200, y: 200}
+  m_Spacing: {x: 10, y: 10}
+  m_Constraint: 0
+  m_ConstraintCount: 2
 --- !u!1 &449669258
 GameObject:
   m_ObjectHideFlags: 0
@@ -1493,9 +1522,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MultiplayerCharacterSelection
   CharacterLists:
   - {fileID: 11400000, guid: 50ab1ed810b1d2e40b96deb8c35cd89d, type: 2}
-  - {fileID: 11400000, guid: 50ab1ed810b1d2e40b96deb8c35cd89d, type: 2}
-  - {fileID: 11400000, guid: 50ab1ed810b1d2e40b96deb8c35cd89d, type: 2}
-  - {fileID: 11400000, guid: 50ab1ed810b1d2e40b96deb8c35cd89d, type: 2}
+  - {fileID: 11400000, guid: b658841a1480531428f4b5ae710b4aed, type: 2}
+  - {fileID: 11400000, guid: 11bd337516182e14fbda48478c921c3e, type: 2}
   p1PanelParent: {fileID: 1978475161}
   p2PanelParent: {fileID: 1693534589}
   characterSlotPrefab: {fileID: 5799372048856892494, guid: a59c24cb61365af428e24f5f500577c7, type: 3}
@@ -1918,6 +1946,7 @@ GameObject:
   - component: {fileID: 1693534592}
   - component: {fileID: 1693534591}
   - component: {fileID: 1693534590}
+  - component: {fileID: 1693534593}
   m_Layer: 5
   m_Name: SecondPlayer
   m_TagString: Untagged
@@ -1996,6 +2025,30 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1693534588}
   m_CullTransparentMesh: 1
+--- !u!114 &1693534593
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1693534588}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a8695521f0d02e499659fee002a26c2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.GridLayoutGroup
+  m_Padding:
+    m_Left: 0
+    m_Right: 0
+    m_Top: 0
+    m_Bottom: 0
+  m_ChildAlignment: 0
+  m_StartCorner: 0
+  m_StartAxis: 0
+  m_CellSize: {x: 200, y: 200}
+  m_Spacing: {x: 20, y: 20}
+  m_Constraint: 0
+  m_ConstraintCount: 2
 --- !u!1 &1710199226
 GameObject:
   m_ObjectHideFlags: 0
@@ -2148,6 +2201,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1953386827}
   - component: {fileID: 1953386829}
+  - component: {fileID: 1953386830}
   - component: {fileID: 1953386828}
   m_Layer: 5
   m_Name: pvpMapSelectionScreenUI
@@ -2215,6 +2269,29 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1953386826}
   m_CullTransparentMesh: 1
+--- !u!114 &1953386830
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1953386826}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 36cc96853b49e594fa092e7a092d704d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameProject.Runtime.Manager.MultiplayerMapSelection
+  mapList:
+  - {fileID: 11400000, guid: de2842ee24c5bd142b410f61475a4ca3, type: 2}
+  - {fileID: 11400000, guid: 0f070ccded3cf2a43b856ff08f81b9fd, type: 2}
+  mapPanelParent: {fileID: 371799710}
+  mapSlotPrefab: {fileID: 5799372048856892494, guid: a59c24cb61365af428e24f5f500577c7, type: 3}
+  unselectedColor: {r: 0.45, g: 0.45, b: 0.45, a: 1}
+  highlightedColor: {r: 1, g: 1, b: 1, a: 1}
+  p1SelectedColor: {r: 0.2, g: 0.6, b: 1, a: 1}
+  p2SelectedColor: {r: 1, g: 0.3, b: 0.3, a: 1}
+  lockedColor: {r: 0.2, g: 1, b: 0.3, a: 1}
+  matchSpawner: {fileID: 1438718015}
 --- !u!1 &1967343835
 GameObject:
   m_ObjectHideFlags: 0
@@ -2299,6 +2376,7 @@ GameObject:
   - component: {fileID: 1978475164}
   - component: {fileID: 1978475163}
   - component: {fileID: 1978475162}
+  - component: {fileID: 1978475165}
   m_Layer: 5
   m_Name: FirstPlayer
   m_TagString: Untagged
@@ -2377,6 +2455,30 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1978475160}
   m_CullTransparentMesh: 1
+--- !u!114 &1978475165
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1978475160}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a8695521f0d02e499659fee002a26c2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.GridLayoutGroup
+  m_Padding:
+    m_Left: 0
+    m_Right: 0
+    m_Top: 0
+    m_Bottom: 0
+  m_ChildAlignment: 0
+  m_StartCorner: 0
+  m_StartAxis: 0
+  m_CellSize: {x: 200, y: 200}
+  m_Spacing: {x: 20, y: 20}
+  m_Constraint: 0
+  m_ConstraintCount: 2
 --- !u!1 &2043324636
 GameObject:
   m_ObjectHideFlags: 0

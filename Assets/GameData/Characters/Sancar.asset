@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 21deb212199bcef40a60794c63c83329, type: 3}
   m_Name: Sancar
   m_EditorClassIdentifier: Assembly-CSharp::CharacterData
-  characterID: sancar
-  displayName: Sancar
+  characterID: Sancar_1
+  displayName: Normal Sancar
   description: "Ana karakter; Story Mode'un oynanabilir d\xF6v\xFC\u015F\xE7\xFCs\xFC"
-  portrait: {fileID: 0}
+  portrait: {fileID: 7699841750030612227, guid: bb1c5d938fa2c6e478c9d015bf39f1c9, type: 3}
   fighterPrefab: {fileID: 494333029108147222, guid: 07e706984c78dd343a60a386811ecfb2, type: 3}
   animatorController: {fileID: 9100000, guid: ab5415274ee9b644898f5a41519cd8cd, type: 2}
   idleAnimatorStateName: Sancar_Idle
