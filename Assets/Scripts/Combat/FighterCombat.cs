@@ -249,32 +249,30 @@ public class FighterCombat : MonoBehaviour
         }
     }
 
-    
-public void CancelAttack()
-{
-    if (!attackRunning)
-        return;
-
-    attackRunning = false;
-    combatTimingFinished = false;
-    hitWindowOpen = false;
-    attackStateObserved = false;
-
-    elapsedCombatFrames = 0;
-    attackElapsedTime = 0f;
-    currentAttack = null;
-
-    motor?.StopMovement();
-
-    if (showDebugLogs)
+    public void CancelAttack()
     {
-        Debug.Log(
-            $"{fighter.name}: ATTACK CANCELLED",
-            this
-        );
-    }
-}
+        if (!attackRunning)
+            return;
 
+        attackRunning = false;
+        combatTimingFinished = false;
+        hitWindowOpen = false;
+        attackStateObserved = false;
+
+        elapsedCombatFrames = 0;
+        attackElapsedTime = 0f;
+        currentAttack = null;
+
+        motor?.StopMovement();
+
+        if (showDebugLogs)
+        {
+            Debug.Log(
+                $"{fighter.name}: ATTACK CANCELLED",
+                this
+            );
+        }
+    }
 
     private void FinishAttack()
     {

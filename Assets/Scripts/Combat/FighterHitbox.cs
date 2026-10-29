@@ -93,115 +93,102 @@ public class FighterHitbox : MonoBehaviour
 
             FighterController target = hurtbox.Owner;
 
-            if (target == null)
-                continue;
-
-            // Do not hit ourselves.
-            if (target == fighter)
-                continue;
-
-            if (!target.IsAlive)
+            // Skip invalid targets and do not hit ourselves.
+            if (target == null ||
+                target == fighter ||
+                !target.IsAlive)
                 continue;
 
             // One hit per target for each attack.
-            if (hitTargets.Contains(target))
+            if (!hitTargets.Add(target))
                 continue;
 
-            hitTargets.Add(target);
+            if (TryGetBlockingDefense(target, out FighterDefense defense))
+            {
+                ApplyBlockedHit(target, defense, attack);
+                continue;
+            }
 
-            
-            
-hitTargets.Add(target);
+            ApplyHit(target, attack);
+        }
+    }
 
-// Check whether the target is defending.
-FighterDefense defense =
-    target.GetComponent<FighterDefense>();
+    // Guard only works against attacks coming from the front.
+    private bool TryGetBlockingDefense(
+        FighterController target,
+        out FighterDefense defense)
+    {
+        defense = target.GetComponent<FighterDefense>();
 
-FighterFacing targetFacing =
-    target.GetComponent<FighterFacing>();
+        if (defense == null || !defense.IsGuarding)
+            return false;
 
-// Guard only works against attacks from the front.
-bool attackFromFront = true;
+        FighterFacing targetFacing =
+            target.GetComponent<FighterFacing>();
 
-if (targetFacing != null)
-{
-    float attackerDirection =
-        fighter.transform.position.x -
-        target.transform.position.x;
+        if (targetFacing == null)
+            return true;
 
-    attackFromFront =
-        attackerDirection * targetFacing.FacingDirection > 0f;
-}
+        float attackerDirection =
+            fighter.transform.position.x -
+            target.transform.position.x;
 
-if (defense != null &&
-    defense.IsGuarding &&
-    attackFromFront)
-{
-    defense.ReceiveBlockedHit();
+        return attackerDirection * targetFacing.FacingDirection > 0f;
+    }
 
-    
-FighterPushback targetPushback =
-    target.GetComponent<FighterPushback>();
+    private void ApplyBlockedHit(
+        FighterController target,
+        FighterDefense defense,
+        AttackData attack)
+    {
+        defense.ReceiveBlockedHit();
 
-if (targetPushback != null)
-{
-    targetPushback.ApplyPushback(
-        fighter.transform.position.x,
-        attack.pushbackDistance,
-        true
-    );
-}
+        // Reduced pushback when the attack is blocked.
+        ApplyPushback(target, attack, true);
 
+        Debug.Log(
+            $"{fighter.name}: ATTACK BLOCKED by {target.name}",
+            this
+        );
+    }
 
-    Debug.Log(
-        $"{fighter.name}: ATTACK BLOCKED by {target.name}",
-        this
-    );
+    private void ApplyHit(
+        FighterController target,
+        AttackData attack)
+    {
+        target.ReceiveDamage(attack.damage);
 
-    continue;
-}
+        FighterHitReaction reaction =
+            target.GetComponent<FighterHitReaction>();
 
-// Normal damage if the attack was not blocked.
+        if (reaction != null)
+            reaction.ReceiveHit(attack.hitStunFrames);
 
-target.ReceiveDamage(attack.damage);
+        // Full pushback after a successful hit.
+        ApplyPushback(target, attack, false);
 
-FighterHitReaction reaction =
-    target.GetComponent<FighterHitReaction>();
+        Debug.Log(
+            $"{fighter.name} hit {target.name} " +
+            $"for {attack.damage} damage. " +
+            $"Remaining HP: {target.CurrentHealth}",
+            this
+        );
+    }
 
-if (reaction != null)
-{
-    reaction.ReceiveHit(attack.hitStunFrames);
-}
+    private void ApplyPushback(
+        FighterController target,
+        AttackData attack,
+        bool wasBlocked)
+    {
+        FighterPushback pushback =
+            target.GetComponent<FighterPushback>();
 
-// Apply full pushback after a successful hit.
-
-FighterPushback normalHitPushback =
-    target.GetComponent<FighterPushback>();
-
-if (normalHitPushback != null)
-{
-    normalHitPushback.ApplyPushback(
-        fighter.transform.position.x,
-        attack.pushbackDistance,
-        false
-    );
-}
-
-
-Debug.Log(
-    $"{fighter.name} hit {target.name} " +
-    $"for {attack.damage} damage. " +
-    $"Remaining HP: {target.CurrentHealth}",
-    this
-);
-
-
-
-            Debug.Log(
-                $"{fighter.name} hit {target.name} " +
-                $"for {attack.damage} damage. " +
-                $"Remaining HP: {target.CurrentHealth}",
-                this
+        if (pushback != null)
+        {
+            pushback.ApplyPushback(
+                fighter.transform.position.x,
+                attack.pushbackDistance,
+                wasBlocked
             );
         }
     }

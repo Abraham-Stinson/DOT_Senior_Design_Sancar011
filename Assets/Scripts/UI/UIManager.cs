@@ -12,6 +12,7 @@ namespace GameProject.Runtime.Manager
         [SerializeField] private GameObject playModeSelectionScreenUI;
         [SerializeField] private GameObject storyMenuScreenUI;
         [SerializeField] private GameObject pvpCharacterSelectionScreenUI;
+        [SerializeField] private GameObject pvpMapSelectionScreenUI;
 
         [Header("HUD")]
         [SerializeField] private GameObject storyPlayScreenUI;
@@ -59,6 +60,9 @@ namespace GameProject.Runtime.Manager
                 case EGameState.PVPM_MENU_CHARACTERSELECTION:
                     if (pvpCharacterSelectionScreenUI) pvpCharacterSelectionScreenUI.SetActive(true);
                     break;
+                case EGameState.PVPM_MENU_MAPSELECTION:
+                    if (pvpMapSelectionScreenUI) pvpMapSelectionScreenUI.SetActive(true);
+                    break;
                 case EGameState.PVPM_PLAYSCREEN:
                     if (pvpPlayScreenUI) pvpPlayScreenUI.SetActive(true);
                     break;
@@ -78,6 +82,7 @@ namespace GameProject.Runtime.Manager
             if (storyMenuScreenUI) storyMenuScreenUI.SetActive(false);
             if (storyPlayScreenUI) storyPlayScreenUI.SetActive(false);
             if (pvpCharacterSelectionScreenUI) pvpCharacterSelectionScreenUI.SetActive(false);
+            if (pvpMapSelectionScreenUI) pvpMapSelectionScreenUI.SetActive(false);
             if (pvpPlayScreenUI) pvpPlayScreenUI.SetActive(false);
             if (pauseMenuUI) pauseMenuUI.SetActive(false);
             if (winScreenUI) winScreenUI.SetActive(false);

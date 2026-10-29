@@ -80,6 +80,7 @@ public class FighterController : MonoBehaviour
 
         currentHealth = characterData.maxHealth;
         movementSpeed = characterData.movementSpeed;
+        RaiseHealthChanged();
 
         if (animator == null)
             animator = GetComponentInChildren<Animator>();
@@ -117,6 +118,7 @@ public class FighterController : MonoBehaviour
             return;
 
         currentHealth = characterData.maxHealth;
+        RaiseHealthChanged();
     }
 
     public void ReceiveDamage(int damage)
@@ -128,6 +130,8 @@ public class FighterController : MonoBehaviour
             0,
             currentHealth - Mathf.Max(0, damage)
         );
+
+        RaiseHealthChanged();
     }
 
     public void RestoreHealth(int amount)
@@ -139,6 +143,13 @@ public class FighterController : MonoBehaviour
             MaxHealth,
             currentHealth + Mathf.Max(0, amount)
         );
+
+        RaiseHealthChanged();
+    }
+
+    private void RaiseHealthChanged()
+    {
+        OnHealthChanged?.Invoke(currentHealth, MaxHealth);
     }
 
     private void Reset()

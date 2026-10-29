@@ -1,0 +1,639 @@
+From f64561ca66d48edbb6dd2be00ad593a10e9b7d75 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Thu, 29 Oct 2026 12:53:23 +0000
+Subject: [PATCH] refactor: reorganize scripts into feature folders and fix
+ forgotten wiring
+
+- Move scripts into Core/Match/UI/_Legacy (GUIDs preserved via .meta moves)
+- FighterController: raise OnHealthChanged so HUD health bars update
+- FighterHitbox: remove duplicated hit/log blocks, split into helpers
+- UIManager: add PVPM_MENU_MAPSELECTION screen slot
+- GameManager: drop unused using, simplify first-state guard
+- AttackData: remove unused attackRange field
+- FighterCombat: fix CancelAttack indentation
+- EGameState: fix copy-paste comments
+---
+ Assets/Scripts/Combat/FighterCombat.cs        |  40 +++--
+ Assets/Scripts/Combat/FighterHitbox.cs        | 161 ++++++++----------
+ Assets/Scripts/Core.meta                      |   2 +-
+ Assets/Scripts/{Enum => Core}/EGameState.cs   |  11 +-
+ .../Scripts/{Enum => Core}/EGameState.cs.meta |   0
+ .../{Runtime/Manager => Core}/GameManager.cs  |   9 +-
+ .../Manager => Core}/GameManager.cs.meta      |   0
+ Assets/Scripts/Data/AttackData.cs             |   3 -
+ Assets/Scripts/Fighters/FighterController.cs  |  11 ++
+ Assets/Scripts/{Enum.meta => Match.meta}      |   2 +-
+ .../Manager => Match}/MatchSpawner.cs         |   0
+ .../Manager => Match}/MatchSpawner.cs.meta    |   0
+ .../Manager => Match}/SubLevelArena.cs        |   0
+ .../Manager => Match}/SubLevelArena.cs.meta   |   0
+ Assets/Scripts/Runtime.meta                   |   8 -
+ Assets/Scripts/Runtime/Character.meta         |   8 -
+ Assets/Scripts/Runtime/Manager.meta           |   8 -
+ Assets/Scripts/Runtime/Manager/UI.meta        |   8 -
+ Assets/Scripts/UI.meta                        |   2 +-
+ .../MultiplayerCharacterSelection.cs          |   0
+ .../MultiplayerCharacterSelection.cs.meta     |   0
+ .../{Runtime/Manager => }/UI/PvPHUDManager.cs |   0
+ .../Manager => }/UI/PvPHUDManager.cs.meta     |   0
+ .../{Runtime/Manager => UI}/UIManager.cs      |   5 +
+ .../{Runtime/Manager => UI}/UIManager.cs.meta |   0
+ .../Character/Movement.meta => _Legacy.meta}  |   2 +-
+ .../Movement => _Legacy}/SancarMovement.cs    |   0
+ .../SancarMovement.cs.meta                    |   0
+ 28 files changed, 121 insertions(+), 159 deletions(-)
+ rename Assets/Scripts/{Enum => Core}/EGameState.cs (70%)
+ rename Assets/Scripts/{Enum => Core}/EGameState.cs.meta (100%)
+ rename Assets/Scripts/{Runtime/Manager => Core}/GameManager.cs (86%)
+ rename Assets/Scripts/{Runtime/Manager => Core}/GameManager.cs.meta (100%)
+ rename Assets/Scripts/{Enum.meta => Match.meta} (77%)
+ rename Assets/Scripts/{Runtime/Manager => Match}/MatchSpawner.cs (100%)
+ rename Assets/Scripts/{Runtime/Manager => Match}/MatchSpawner.cs.meta (100%)
+ rename Assets/Scripts/{Runtime/Manager => Match}/SubLevelArena.cs (100%)
+ rename Assets/Scripts/{Runtime/Manager => Match}/SubLevelArena.cs.meta (100%)
+ delete mode 100644 Assets/Scripts/Runtime.meta
+ delete mode 100644 Assets/Scripts/Runtime/Character.meta
+ delete mode 100644 Assets/Scripts/Runtime/Manager.meta
+ delete mode 100644 Assets/Scripts/Runtime/Manager/UI.meta
+ rename Assets/Scripts/{Runtime/Manager => UI}/MultiplayerCharacterSelection.cs (100%)
+ rename Assets/Scripts/{Runtime/Manager => UI}/MultiplayerCharacterSelection.cs.meta (100%)
+ rename Assets/Scripts/{Runtime/Manager => }/UI/PvPHUDManager.cs (100%)
+ rename Assets/Scripts/{Runtime/Manager => }/UI/PvPHUDManager.cs.meta (100%)
+ rename Assets/Scripts/{Runtime/Manager => UI}/UIManager.cs (92%)
+ rename Assets/Scripts/{Runtime/Manager => UI}/UIManager.cs.meta (100%)
+ rename Assets/Scripts/{Runtime/Character/Movement.meta => _Legacy.meta} (77%)
+ rename Assets/Scripts/{Runtime/Character/Movement => _Legacy}/SancarMovement.cs (100%)
+ rename Assets/Scripts/{Runtime/Character/Movement => _Legacy}/SancarMovement.cs.meta (100%)
+
+diff --git a/Assets/Scripts/Combat/FighterCombat.cs b/Assets/Scripts/Combat/FighterCombat.cs
+index ab661a4..c573112 100644
+--- a/Assets/Scripts/Combat/FighterCombat.cs
++++ b/Assets/Scripts/Combat/FighterCombat.cs
+@@ -249,32 +249,30 @@ public class FighterCombat : MonoBehaviour
+         }
+     }
+ 
+-    
+-public void CancelAttack()
+-{
+-    if (!attackRunning)
+-        return;
++    public void CancelAttack()
++    {
++        if (!attackRunning)
++            return;
+ 
+-    attackRunning = false;
+-    combatTimingFinished = false;
+-    hitWindowOpen = false;
+-    attackStateObserved = false;
++        attackRunning = false;
++        combatTimingFinished = false;
++        hitWindowOpen = false;
++        attackStateObserved = false;
+ 
+-    elapsedCombatFrames = 0;
+-    attackElapsedTime = 0f;
+-    currentAttack = null;
++        elapsedCombatFrames = 0;
++        attackElapsedTime = 0f;
++        currentAttack = null;
+ 
+-    motor?.StopMovement();
++        motor?.StopMovement();
+ 
+-    if (showDebugLogs)
+-    {
+-        Debug.Log(
+-            $"{fighter.name}: ATTACK CANCELLED",
+-            this
+-        );
++        if (showDebugLogs)
++        {
++            Debug.Log(
++                $"{fighter.name}: ATTACK CANCELLED",
++                this
++            );
++        }
+     }
+-}
+-
+ 
+     private void FinishAttack()
+     {
+diff --git a/Assets/Scripts/Combat/FighterHitbox.cs b/Assets/Scripts/Combat/FighterHitbox.cs
+index f8217d1..7e86e4b 100644
+--- a/Assets/Scripts/Combat/FighterHitbox.cs
++++ b/Assets/Scripts/Combat/FighterHitbox.cs
+@@ -93,115 +93,102 @@ public class FighterHitbox : MonoBehaviour
+ 
+             FighterController target = hurtbox.Owner;
+ 
+-            if (target == null)
+-                continue;
+-
+-            // Do not hit ourselves.
+-            if (target == fighter)
+-                continue;
+-
+-            if (!target.IsAlive)
++            // Skip invalid targets and do not hit ourselves.
++            if (target == null ||
++                target == fighter ||
++                !target.IsAlive)
+                 continue;
+ 
+             // One hit per target for each attack.
+-            if (hitTargets.Contains(target))
++            if (!hitTargets.Add(target))
+                 continue;
+ 
+-            hitTargets.Add(target);
+-
+-            
+-            
+-hitTargets.Add(target);
+-
+-// Check whether the target is defending.
+-FighterDefense defense =
+-    target.GetComponent<FighterDefense>();
+-
+-FighterFacing targetFacing =
+-    target.GetComponent<FighterFacing>();
+-
+-// Guard only works against attacks from the front.
+-bool attackFromFront = true;
+-
+-if (targetFacing != null)
+-{
+-    float attackerDirection =
+-        fighter.transform.position.x -
+-        target.transform.position.x;
+-
+-    attackFromFront =
+-        attackerDirection * targetFacing.FacingDirection > 0f;
+-}
+-
+-if (defense != null &&
+-    defense.IsGuarding &&
+-    attackFromFront)
+-{
+-    defense.ReceiveBlockedHit();
++            if (TryGetBlockingDefense(target, out FighterDefense defense))
++            {
++                ApplyBlockedHit(target, defense, attack);
++                continue;
++            }
+ 
+-    
+-FighterPushback targetPushback =
+-    target.GetComponent<FighterPushback>();
++            ApplyHit(target, attack);
++        }
++    }
+ 
+-if (targetPushback != null)
+-{
+-    targetPushback.ApplyPushback(
+-        fighter.transform.position.x,
+-        attack.pushbackDistance,
+-        true
+-    );
+-}
++    // Guard only works against attacks coming from the front.
++    private bool TryGetBlockingDefense(
++        FighterController target,
++        out FighterDefense defense)
++    {
++        defense = target.GetComponent<FighterDefense>();
+ 
++        if (defense == null || !defense.IsGuarding)
++            return false;
+ 
+-    Debug.Log(
+-        $"{fighter.name}: ATTACK BLOCKED by {target.name}",
+-        this
+-    );
++        FighterFacing targetFacing =
++            target.GetComponent<FighterFacing>();
+ 
+-    continue;
+-}
++        if (targetFacing == null)
++            return true;
+ 
+-// Normal damage if the attack was not blocked.
++        float attackerDirection =
++            fighter.transform.position.x -
++            target.transform.position.x;
+ 
+-target.ReceiveDamage(attack.damage);
++        return attackerDirection * targetFacing.FacingDirection > 0f;
++    }
+ 
+-FighterHitReaction reaction =
+-    target.GetComponent<FighterHitReaction>();
++    private void ApplyBlockedHit(
++        FighterController target,
++        FighterDefense defense,
++        AttackData attack)
++    {
++        defense.ReceiveBlockedHit();
+ 
+-if (reaction != null)
+-{
+-    reaction.ReceiveHit(attack.hitStunFrames);
+-}
++        // Reduced pushback when the attack is blocked.
++        ApplyPushback(target, attack, true);
+ 
+-// Apply full pushback after a successful hit.
++        Debug.Log(
++            $"{fighter.name}: ATTACK BLOCKED by {target.name}",
++            this
++        );
++    }
+ 
+-FighterPushback normalHitPushback =
+-    target.GetComponent<FighterPushback>();
++    private void ApplyHit(
++        FighterController target,
++        AttackData attack)
++    {
++        target.ReceiveDamage(attack.damage);
+ 
+-if (normalHitPushback != null)
+-{
+-    normalHitPushback.ApplyPushback(
+-        fighter.transform.position.x,
+-        attack.pushbackDistance,
+-        false
+-    );
+-}
++        FighterHitReaction reaction =
++            target.GetComponent<FighterHitReaction>();
+ 
++        if (reaction != null)
++            reaction.ReceiveHit(attack.hitStunFrames);
+ 
+-Debug.Log(
+-    $"{fighter.name} hit {target.name} " +
+-    $"for {attack.damage} damage. " +
+-    $"Remaining HP: {target.CurrentHealth}",
+-    this
+-);
++        // Full pushback after a successful hit.
++        ApplyPushback(target, attack, false);
+ 
++        Debug.Log(
++            $"{fighter.name} hit {target.name} " +
++            $"for {attack.damage} damage. " +
++            $"Remaining HP: {target.CurrentHealth}",
++            this
++        );
++    }
+ 
++    private void ApplyPushback(
++        FighterController target,
++        AttackData attack,
++        bool wasBlocked)
++    {
++        FighterPushback pushback =
++            target.GetComponent<FighterPushback>();
+ 
+-            Debug.Log(
+-                $"{fighter.name} hit {target.name} " +
+-                $"for {attack.damage} damage. " +
+-                $"Remaining HP: {target.CurrentHealth}",
+-                this
++        if (pushback != null)
++        {
++            pushback.ApplyPushback(
++                fighter.transform.position.x,
++                attack.pushbackDistance,
++                wasBlocked
+             );
+         }
+     }
+diff --git a/Assets/Scripts/Core.meta b/Assets/Scripts/Core.meta
+index 9c4909c..c9fc9ef 100644
+--- a/Assets/Scripts/Core.meta
++++ b/Assets/Scripts/Core.meta
+@@ -1,5 +1,5 @@
+ fileFormatVersion: 2
+-guid: e0b600a79e9851148bf0a9e29fb7b35a
++guid: a7093658db5643ab92dcd6109f7c7c7b
+ folderAsset: yes
+ DefaultImporter:
+   externalObjects: {}
+diff --git a/Assets/Scripts/Enum/EGameState.cs b/Assets/Scripts/Core/EGameState.cs
+similarity index 70%
+rename from Assets/Scripts/Enum/EGameState.cs
+rename to Assets/Scripts/Core/EGameState.cs
+index dc0c558..ed85b75 100644
+--- a/Assets/Scripts/Enum/EGameState.cs
++++ b/Assets/Scripts/Core/EGameState.cs
+@@ -1,5 +1,3 @@
+-using UnityEngine;
+-
+ public enum EGameState
+ {
+     FIRSTSTART = 0, //PRESS TO START
+@@ -7,9 +5,8 @@ public enum EGameState
+     STRM_MENU = 2, //IF STORY MODE SELECTED - NEW GAME OR CONTINUE
+     STRM_PLAYSCREEN = 3, //STORY MODE - GAMEPLAY UI
+     PVPM_MENU_CHARACTERSELECTION = 4, //IF PvP MODE SELECTED - CHARACTER SELECTION MENU WILL SHOW UP 
+-    PVPM_MENU_MAPSELECTION = 5,
+-    PVPM_PLAYSCREEN = 6, //STORY MODE - GAMEPLAY UI
+-    WIN = 7,//WIN?
+-    LOSE = 8//LOSE
+-    
++    PVPM_MENU_MAPSELECTION = 5, //PvP MODE - MAP SELECTION MENU
++    PVPM_PLAYSCREEN = 6, //PvP MODE - GAMEPLAY UI
++    WIN = 7, //WIN
++    LOSE = 8 //LOSE
+ }
+diff --git a/Assets/Scripts/Enum/EGameState.cs.meta b/Assets/Scripts/Core/EGameState.cs.meta
+similarity index 100%
+rename from Assets/Scripts/Enum/EGameState.cs.meta
+rename to Assets/Scripts/Core/EGameState.cs.meta
+diff --git a/Assets/Scripts/Runtime/Manager/GameManager.cs b/Assets/Scripts/Core/GameManager.cs
+similarity index 86%
+rename from Assets/Scripts/Runtime/Manager/GameManager.cs
+rename to Assets/Scripts/Core/GameManager.cs
+index eb3934b..c994242 100644
+--- a/Assets/Scripts/Runtime/Manager/GameManager.cs
++++ b/Assets/Scripts/Core/GameManager.cs
+@@ -1,5 +1,4 @@
+ using System;
+-using Unity.VisualScripting;
+ using UnityEngine;
+ using UnityEngine.InputSystem;
+ 
+@@ -11,7 +10,7 @@ namespace GameProject.Runtime.Manager
+         public static GameManager instance;
+         public EGameState gameState { get; private set; }
+         public static event Action<EGameState> OnGameStateChanged;
+-        private bool firstOpen = true;
++        private bool initialized;
+ 
+         #endregion
+         #region Unity Methods
+@@ -30,7 +29,6 @@ namespace GameProject.Runtime.Manager
+         private void Start()
+         {
+             SetGameState(EGameState.FIRSTSTART);
+-            firstOpen = true;
+         }
+         private void Update()
+         {
+@@ -50,10 +48,11 @@ namespace GameProject.Runtime.Manager
+         #region Methods
+         public void SetGameState(EGameState newState)
+         {
+-            if (!firstOpen && gameState == newState) return;
++            if (initialized && gameState == newState) return;
+ 
++            initialized = true;
+             gameState = newState;
+-            Debug.Log($"Game Object: {gameObject.name}.Compopent:{this.GetType().Name} : Switched to the {gameState}");
++            Debug.Log($"{nameof(GameManager)}: Switched to {gameState}");
+             OnGameStateChanged?.Invoke(gameState);
+         }
+ 
+diff --git a/Assets/Scripts/Runtime/Manager/GameManager.cs.meta b/Assets/Scripts/Core/GameManager.cs.meta
+similarity index 100%
+rename from Assets/Scripts/Runtime/Manager/GameManager.cs.meta
+rename to Assets/Scripts/Core/GameManager.cs.meta
+diff --git a/Assets/Scripts/Data/AttackData.cs b/Assets/Scripts/Data/AttackData.cs
+index c1a5324..97c52bf 100644
+--- a/Assets/Scripts/Data/AttackData.cs
++++ b/Assets/Scripts/Data/AttackData.cs
+@@ -28,9 +28,6 @@ public class AttackData : ScriptableObject
+     [Min(0)]
+     public int damage = 35;
+ 
+-    [Min(0f)]
+-    public float attackRange = 1.5f;
+-
+     [Header("Combat Timing - 60 FPS")]
+     [Min(0)]
+     public int startupFrames = 5;
+diff --git a/Assets/Scripts/Fighters/FighterController.cs b/Assets/Scripts/Fighters/FighterController.cs
+index e33eb47..06018ac 100644
+--- a/Assets/Scripts/Fighters/FighterController.cs
++++ b/Assets/Scripts/Fighters/FighterController.cs
+@@ -80,6 +80,7 @@ public class FighterController : MonoBehaviour
+ 
+         currentHealth = characterData.maxHealth;
+         movementSpeed = characterData.movementSpeed;
++        RaiseHealthChanged();
+ 
+         if (animator == null)
+             animator = GetComponentInChildren<Animator>();
+@@ -117,6 +118,7 @@ public class FighterController : MonoBehaviour
+             return;
+ 
+         currentHealth = characterData.maxHealth;
++        RaiseHealthChanged();
+     }
+ 
+     public void ReceiveDamage(int damage)
+@@ -128,6 +130,8 @@ public class FighterController : MonoBehaviour
+             0,
+             currentHealth - Mathf.Max(0, damage)
+         );
++
++        RaiseHealthChanged();
+     }
+ 
+     public void RestoreHealth(int amount)
+@@ -139,6 +143,13 @@ public class FighterController : MonoBehaviour
+             MaxHealth,
+             currentHealth + Mathf.Max(0, amount)
+         );
++
++        RaiseHealthChanged();
++    }
++
++    private void RaiseHealthChanged()
++    {
++        OnHealthChanged?.Invoke(currentHealth, MaxHealth);
+     }
+ 
+     private void Reset()
+diff --git a/Assets/Scripts/Enum.meta b/Assets/Scripts/Match.meta
+similarity index 77%
+rename from Assets/Scripts/Enum.meta
+rename to Assets/Scripts/Match.meta
+index 29d8e6f..79b2400 100644
+--- a/Assets/Scripts/Enum.meta
++++ b/Assets/Scripts/Match.meta
+@@ -1,5 +1,5 @@
+ fileFormatVersion: 2
+-guid: 7bd804394167ca54187abab4326c3bf9
++guid: ad91821b53da4b7bb44aabcfa54c374d
+ folderAsset: yes
+ DefaultImporter:
+   externalObjects: {}
+diff --git a/Assets/Scripts/Runtime/Manager/MatchSpawner.cs b/Assets/Scripts/Match/MatchSpawner.cs
+similarity index 100%
+rename from Assets/Scripts/Runtime/Manager/MatchSpawner.cs
+rename to Assets/Scripts/Match/MatchSpawner.cs
+diff --git a/Assets/Scripts/Runtime/Manager/MatchSpawner.cs.meta b/Assets/Scripts/Match/MatchSpawner.cs.meta
+similarity index 100%
+rename from Assets/Scripts/Runtime/Manager/MatchSpawner.cs.meta
+rename to Assets/Scripts/Match/MatchSpawner.cs.meta
+diff --git a/Assets/Scripts/Runtime/Manager/SubLevelArena.cs b/Assets/Scripts/Match/SubLevelArena.cs
+similarity index 100%
+rename from Assets/Scripts/Runtime/Manager/SubLevelArena.cs
+rename to Assets/Scripts/Match/SubLevelArena.cs
+diff --git a/Assets/Scripts/Runtime/Manager/SubLevelArena.cs.meta b/Assets/Scripts/Match/SubLevelArena.cs.meta
+similarity index 100%
+rename from Assets/Scripts/Runtime/Manager/SubLevelArena.cs.meta
+rename to Assets/Scripts/Match/SubLevelArena.cs.meta
+diff --git a/Assets/Scripts/Runtime.meta b/Assets/Scripts/Runtime.meta
+deleted file mode 100644
+index ab7867c..0000000
+--- a/Assets/Scripts/Runtime.meta
++++ /dev/null
+@@ -1,8 +0,0 @@
+-fileFormatVersion: 2
+-guid: a3d8ea52726687343aca3b5ff8f2cd46
+-folderAsset: yes
+-DefaultImporter:
+-  externalObjects: {}
+-  userData: 
+-  assetBundleName: 
+-  assetBundleVariant: 
+diff --git a/Assets/Scripts/Runtime/Character.meta b/Assets/Scripts/Runtime/Character.meta
+deleted file mode 100644
+index 8ed7984..0000000
+--- a/Assets/Scripts/Runtime/Character.meta
++++ /dev/null
+@@ -1,8 +0,0 @@
+-fileFormatVersion: 2
+-guid: 1a3020f52a2cd824abe19d2f3a9a37d4
+-folderAsset: yes
+-DefaultImporter:
+-  externalObjects: {}
+-  userData: 
+-  assetBundleName: 
+-  assetBundleVariant: 
+diff --git a/Assets/Scripts/Runtime/Manager.meta b/Assets/Scripts/Runtime/Manager.meta
+deleted file mode 100644
+index 342d878..0000000
+--- a/Assets/Scripts/Runtime/Manager.meta
++++ /dev/null
+@@ -1,8 +0,0 @@
+-fileFormatVersion: 2
+-guid: ab1ea8812691bac43baf85e55ad99a75
+-folderAsset: yes
+-DefaultImporter:
+-  externalObjects: {}
+-  userData: 
+-  assetBundleName: 
+-  assetBundleVariant: 
+diff --git a/Assets/Scripts/Runtime/Manager/UI.meta b/Assets/Scripts/Runtime/Manager/UI.meta
+deleted file mode 100644
+index 6e346b3..0000000
+--- a/Assets/Scripts/Runtime/Manager/UI.meta
++++ /dev/null
+@@ -1,8 +0,0 @@
+-fileFormatVersion: 2
+-guid: d2e66255895718342944f9577c72eadf
+-folderAsset: yes
+-DefaultImporter:
+-  externalObjects: {}
+-  userData: 
+-  assetBundleName: 
+-  assetBundleVariant: 
+diff --git a/Assets/Scripts/UI.meta b/Assets/Scripts/UI.meta
+index b64fa74..d6482d5 100644
+--- a/Assets/Scripts/UI.meta
++++ b/Assets/Scripts/UI.meta
+@@ -1,5 +1,5 @@
+ fileFormatVersion: 2
+-guid: 023d0398d8ddf814386ceb432ec7ba0f
++guid: 7a2de43bd96441b0a066f0b7343e6a5c
+ folderAsset: yes
+ DefaultImporter:
+   externalObjects: {}
+diff --git a/Assets/Scripts/Runtime/Manager/MultiplayerCharacterSelection.cs b/Assets/Scripts/UI/MultiplayerCharacterSelection.cs
+similarity index 100%
+rename from Assets/Scripts/Runtime/Manager/MultiplayerCharacterSelection.cs
+rename to Assets/Scripts/UI/MultiplayerCharacterSelection.cs
+diff --git a/Assets/Scripts/Runtime/Manager/MultiplayerCharacterSelection.cs.meta b/Assets/Scripts/UI/MultiplayerCharacterSelection.cs.meta
+similarity index 100%
+rename from Assets/Scripts/Runtime/Manager/MultiplayerCharacterSelection.cs.meta
+rename to Assets/Scripts/UI/MultiplayerCharacterSelection.cs.meta
+diff --git a/Assets/Scripts/Runtime/Manager/UI/PvPHUDManager.cs b/Assets/Scripts/UI/PvPHUDManager.cs
+similarity index 100%
+rename from Assets/Scripts/Runtime/Manager/UI/PvPHUDManager.cs
+rename to Assets/Scripts/UI/PvPHUDManager.cs
+diff --git a/Assets/Scripts/Runtime/Manager/UI/PvPHUDManager.cs.meta b/Assets/Scripts/UI/PvPHUDManager.cs.meta
+similarity index 100%
+rename from Assets/Scripts/Runtime/Manager/UI/PvPHUDManager.cs.meta
+rename to Assets/Scripts/UI/PvPHUDManager.cs.meta
+diff --git a/Assets/Scripts/Runtime/Manager/UIManager.cs b/Assets/Scripts/UI/UIManager.cs
+similarity index 92%
+rename from Assets/Scripts/Runtime/Manager/UIManager.cs
+rename to Assets/Scripts/UI/UIManager.cs
+index 6bca64b..9df4ca5 100644
+--- a/Assets/Scripts/Runtime/Manager/UIManager.cs
++++ b/Assets/Scripts/UI/UIManager.cs
+@@ -12,6 +12,7 @@ namespace GameProject.Runtime.Manager
+         [SerializeField] private GameObject playModeSelectionScreenUI;
+         [SerializeField] private GameObject storyMenuScreenUI;
+         [SerializeField] private GameObject pvpCharacterSelectionScreenUI;
++        [SerializeField] private GameObject pvpMapSelectionScreenUI;
+ 
+         [Header("HUD")]
+         [SerializeField] private GameObject storyPlayScreenUI;
+@@ -59,6 +60,9 @@ namespace GameProject.Runtime.Manager
+                 case EGameState.PVPM_MENU_CHARACTERSELECTION:
+                     if (pvpCharacterSelectionScreenUI) pvpCharacterSelectionScreenUI.SetActive(true);
+                     break;
++                case EGameState.PVPM_MENU_MAPSELECTION:
++                    if (pvpMapSelectionScreenUI) pvpMapSelectionScreenUI.SetActive(true);
++                    break;
+                 case EGameState.PVPM_PLAYSCREEN:
+                     if (pvpPlayScreenUI) pvpPlayScreenUI.SetActive(true);
+                     break;
+@@ -78,6 +82,7 @@ namespace GameProject.Runtime.Manager
+             if (storyMenuScreenUI) storyMenuScreenUI.SetActive(false);
+             if (storyPlayScreenUI) storyPlayScreenUI.SetActive(false);
+             if (pvpCharacterSelectionScreenUI) pvpCharacterSelectionScreenUI.SetActive(false);
++            if (pvpMapSelectionScreenUI) pvpMapSelectionScreenUI.SetActive(false);
+             if (pvpPlayScreenUI) pvpPlayScreenUI.SetActive(false);
+             if (pauseMenuUI) pauseMenuUI.SetActive(false);
+             if (winScreenUI) winScreenUI.SetActive(false);
+diff --git a/Assets/Scripts/Runtime/Manager/UIManager.cs.meta b/Assets/Scripts/UI/UIManager.cs.meta
+similarity index 100%
+rename from Assets/Scripts/Runtime/Manager/UIManager.cs.meta
+rename to Assets/Scripts/UI/UIManager.cs.meta
+diff --git a/Assets/Scripts/Runtime/Character/Movement.meta b/Assets/Scripts/_Legacy.meta
+similarity index 77%
+rename from Assets/Scripts/Runtime/Character/Movement.meta
+rename to Assets/Scripts/_Legacy.meta
+index 4cf082d..8ca3b88 100644
+--- a/Assets/Scripts/Runtime/Character/Movement.meta
++++ b/Assets/Scripts/_Legacy.meta
+@@ -1,5 +1,5 @@
+ fileFormatVersion: 2
+-guid: 24dbfd27a96173640871cb8a195ade77
++guid: f96c73c3f38247f9a9c019b5ba7dd824
+ folderAsset: yes
+ DefaultImporter:
+   externalObjects: {}
+diff --git a/Assets/Scripts/Runtime/Character/Movement/SancarMovement.cs b/Assets/Scripts/_Legacy/SancarMovement.cs
+similarity index 100%
+rename from Assets/Scripts/Runtime/Character/Movement/SancarMovement.cs
+rename to Assets/Scripts/_Legacy/SancarMovement.cs
+diff --git a/Assets/Scripts/Runtime/Character/Movement/SancarMovement.cs.meta b/Assets/Scripts/_Legacy/SancarMovement.cs.meta
+similarity index 100%
+rename from Assets/Scripts/Runtime/Character/Movement/SancarMovement.cs.meta
+rename to Assets/Scripts/_Legacy/SancarMovement.cs.meta
+-- 
+2.43.0
+

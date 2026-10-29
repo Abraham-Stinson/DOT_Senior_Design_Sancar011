@@ -1,5 +1,4 @@
 using System;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -11,7 +10,7 @@ namespace GameProject.Runtime.Manager
         public static GameManager instance;
         public EGameState gameState { get; private set; }
         public static event Action<EGameState> OnGameStateChanged;
-        private bool firstOpen = true;
+        private bool initialized;
 
         #endregion
         #region Unity Methods
@@ -30,7 +29,6 @@ namespace GameProject.Runtime.Manager
         private void Start()
         {
             SetGameState(EGameState.FIRSTSTART);
-            firstOpen = true;
         }
         private void Update()
         {
@@ -50,10 +48,11 @@ namespace GameProject.Runtime.Manager
         #region Methods
         public void SetGameState(EGameState newState)
         {
-            if (!firstOpen && gameState == newState) return;
+            if (initialized && gameState == newState) return;
 
+            initialized = true;
             gameState = newState;
-            Debug.Log($"Game Object: {gameObject.name}.Compopent:{this.GetType().Name} : Switched to the {gameState}");
+            Debug.Log($"{nameof(GameManager)}: Switched to {gameState}");
             OnGameStateChanged?.Invoke(gameState);
         }
 

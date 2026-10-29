@@ -28,9 +28,6 @@ public class AttackData : ScriptableObject
     [Min(0)]
     public int damage = 35;
 
-    [Min(0f)]
-    public float attackRange = 1.5f;
-
     [Header("Combat Timing - 60 FPS")]
     [Min(0)]
     public int startupFrames = 5;
