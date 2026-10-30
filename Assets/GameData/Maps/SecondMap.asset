@@ -15,4 +15,5 @@ MonoBehaviour:
   mapID: 2
   displayName: "HadiBal\u0131k"
   mapPortrait: {fileID: 1058525918055622259, guid: d8fb04b9f99b25a459649053ec687044, type: 3}
+  backgroundSprite: {fileID: 1058525918055622259, guid: d8fb04b9f99b25a459649053ec687044, type: 3}
   arenaPrefab: {fileID: 5551002520122876218, guid: d207500e1f5b9144eb883aaed3fe4982, type: 3}

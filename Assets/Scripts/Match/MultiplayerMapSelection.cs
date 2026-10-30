@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.InputSystem;
+using TMPro; 
 
 namespace GameProject.Runtime.Manager
 {
@@ -11,7 +12,7 @@ namespace GameProject.Runtime.Manager
         [SerializeField] private MapData[] mapList;
 
         [Header("Single Panel UI Generation")]
-        [SerializeField] private Transform mapPanelParent; // Tek ortak panelin parent objesi
+        [SerializeField] private Transform mapPanelParent;
         [SerializeField] private Image mapSlotPrefab;
 
         [Header("Selection Visuals")]
@@ -20,6 +21,13 @@ namespace GameProject.Runtime.Manager
         [SerializeField] private Color p1SelectedColor = new Color(0.2f, 0.6f, 1f, 1f);
         [SerializeField] private Color p2SelectedColor = new Color(1f, 0.3f, 0.3f, 1f);
         [SerializeField] private Color lockedColor = new Color(0.2f, 1f, 0.3f, 1f);
+
+        [Header("Map Info & Ready Texts")]
+        [SerializeField] private TextMeshProUGUI p1MapNameText;
+        [SerializeField] private TextMeshProUGUI p1ReadyText;
+        [SerializeField] private TextMeshProUGUI p2MapNameText;
+        [SerializeField] private TextMeshProUGUI p2ReadyText;
+
         [Header("Match Spawner Reference")]
         [SerializeField] private MatchSpawner matchSpawner;
 
@@ -27,8 +35,10 @@ namespace GameProject.Runtime.Manager
 
         private int p1MapIndex = 0;
         private int p2MapIndex = 0;
+
         private bool p1MapLocked = false;
         private bool p2MapLocked = false;
+
         private bool isMapUIGenerated = false;
 
         private void Awake()
@@ -106,7 +116,6 @@ namespace GameProject.Runtime.Manager
 
             if (!p1MapLocked)
             {
-                // P1 Kontrolleri: A ve D tuşları
                 if (keyboard.dKey.wasPressedThisFrame)
                 {
                     p1MapIndex = (p1MapIndex + 1) % count;
@@ -118,7 +127,6 @@ namespace GameProject.Runtime.Manager
                     UpdateMapSelectionUI();
                 }
 
-                // P1 Onay Tuşu: J veya Space
                 if (keyboard.jKey.wasPressedThisFrame || keyboard.spaceKey.wasPressedThisFrame)
                 {
                     p1MapLocked = true;
@@ -126,7 +134,7 @@ namespace GameProject.Runtime.Manager
                     TryGenerateMatch();
                 }
             }
-            else if (keyboard.kKey.wasPressedThisFrame) // P1 İptal Tuşu: K
+            else if (keyboard.kKey.wasPressedThisFrame)
             {
                 p1MapLocked = false;
                 UpdateMapSelectionUI();
@@ -140,7 +148,6 @@ namespace GameProject.Runtime.Manager
 
             if (!p2MapLocked)
             {
-                // P2 Kontrolleri: Sol ve Sağ Ok tuşları
                 if (keyboard.rightArrowKey.wasPressedThisFrame)
                 {
                     p2MapIndex = (p2MapIndex + 1) % count;
@@ -152,7 +159,6 @@ namespace GameProject.Runtime.Manager
                     UpdateMapSelectionUI();
                 }
 
-                // P2 Onay Tuşu: Numpad 1 veya Enter
                 if (keyboard.numpad1Key.wasPressedThisFrame || keyboard.enterKey.wasPressedThisFrame)
                 {
                     p2MapLocked = true;
@@ -160,7 +166,7 @@ namespace GameProject.Runtime.Manager
                     TryGenerateMatch();
                 }
             }
-            else if (keyboard.numpad2Key.wasPressedThisFrame) // P2 İptal Tuşu: Numpad 2
+            else if (keyboard.numpad2Key.wasPressedThisFrame)
             {
                 p2MapLocked = false;
                 UpdateMapSelectionUI();
@@ -182,7 +188,6 @@ namespace GameProject.Runtime.Manager
                 }
                 else if (isP1Hovered && isP2Hovered)
                 {
-                    // İki oyuncu da aynı harita üzerindeyse renkleri harmanlayabilir veya ortak renk verebiliriz
                     mapSlots[i].color = highlightedColor;
                 }
                 else if (isP1Hovered)
@@ -198,27 +203,39 @@ namespace GameProject.Runtime.Manager
                     mapSlots[i].color = unselectedColor;
                 }
             }
+
+            if (mapList != null && mapList.Length > 0)
+            {
+                if (p1MapNameText != null)
+                    p1MapNameText.text = mapList[p1MapIndex].displayName;
+
+                if (p2MapNameText != null)
+                    p2MapNameText.text = mapList[p2MapIndex].displayName;
+            }
+
+            if (p1ReadyText != null)
+                p1ReadyText.text = p1MapLocked ? "READY" : "";
+
+            if (p2ReadyText != null)
+                p2ReadyText.text = p2MapLocked ? "READY" : "";
         }
 
         private void TryGenerateMatch()
         {
-            // İki oyuncu da haritasını onaylamadan maçı başlatma
             if (!p1MapLocked || !p2MapLocked)
                 return;
 
-            // Eğer haritalar aynıysa direkt onu seç, farklıysa rastgele birini seç
-            int finalMapIndex = (p1MapIndex == p2MapIndex)
-                ? p1MapIndex
-                : (Random.Range(0, 2) == 0 ? p1MapIndex : p2MapIndex);
+            if (p1MapIndex != p2MapIndex)
+                return;
 
-            MapData chosenMap = mapList[finalMapIndex];
+            MapData chosenMap = mapList[p1MapIndex];
+            Debug.Log($"Players selected: {chosenMap.displayName}");
 
             if (matchSpawner != null)
             {
                 matchSpawner.GenerateSubLevelAndFighters(chosenMap);
             }
 
-            // Maç sahnesine / oynanış ekranına geç
             GameManager.instance.SetGameState(EGameState.PVPM_PLAYSCREEN);
         }
     }

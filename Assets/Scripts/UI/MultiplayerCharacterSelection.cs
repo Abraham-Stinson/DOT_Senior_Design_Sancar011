@@ -2,6 +2,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.InputSystem;
+using TMPro;
+
 
 namespace GameProject.Runtime.Manager
 {
@@ -22,6 +24,12 @@ namespace GameProject.Runtime.Manager
 
         [Header("Match Spawner Reference")]
         [SerializeField] private MatchSpawner matchSpawner;
+
+        [Header("Character Info & Ready Texts")]
+        [SerializeField] private TextMeshProUGUI p1NameText;
+        [SerializeField] private TextMeshProUGUI p1ReadyText;
+        [SerializeField] private TextMeshProUGUI p2NameText;
+        [SerializeField] private TextMeshProUGUI p2ReadyText;
 
         private readonly List<Image> p1GeneratedSlots = new List<Image>();
         private readonly List<Image> p2GeneratedSlots = new List<Image>();
@@ -185,6 +193,12 @@ namespace GameProject.Runtime.Manager
                     : unselectedColor;
             }
 
+            if (p1NameText != null && CharacterLists.Length > 0)
+                p1NameText.text = CharacterLists[p1Index].displayName;
+
+            if (p1ReadyText != null)
+                p1ReadyText.text = p1Locked ? "READY" : "";
+
             for (int i = 0; i < p2GeneratedSlots.Count; i++)
             {
                 if (p2GeneratedSlots[i] == null) continue;
@@ -192,6 +206,12 @@ namespace GameProject.Runtime.Manager
                     ? (p2Locked ? lockedColor : highlightedColor)
                     : unselectedColor;
             }
+
+            if (p2NameText != null && CharacterLists.Length > 0)
+                p2NameText.text = CharacterLists[p2Index].displayName;
+
+            if (p2ReadyText != null)
+                p2ReadyText.text = p2Locked ? "READY" : "";
         }
 
         private void ProceedToMapSelection()
@@ -206,7 +226,8 @@ namespace GameProject.Runtime.Manager
             {
                 matchSpawner.SetSelectedCharacters(p1SelectedData, p2SelectedData);
             }
-
+            Debug.Log($"Player 1 select: {p1SelectedData.displayName}");
+            Debug.Log($"Player 2 select: {p2SelectedData.displayName}");
             GameManager.instance.SetGameState(EGameState.PVPM_MENU_MAPSELECTION);
         }
     }
