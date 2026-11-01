@@ -31,11 +31,9 @@ public class FighterController : MonoBehaviour
     public CharacterData Data => characterData;
     public Animator Animator => animator;
     public Transform VisualRoot => visualRoot;
-
     public FighterControlType ControlType => controlType;
 
     public int CurrentHealth => currentHealth;
-
     public int MaxHealth =>
         characterData != null ? characterData.maxHealth : 0;
 
@@ -72,14 +70,13 @@ public class FighterController : MonoBehaviour
                 $"{name}: Gecersiz CharacterData!",
                 this
             );
-
             return;
         }
 
         characterData = data;
-
         currentHealth = characterData.maxHealth;
         movementSpeed = characterData.movementSpeed;
+
         RaiseHealthChanged();
 
         if (animator == null)
@@ -154,19 +151,16 @@ public class FighterController : MonoBehaviour
 
     public void ResetCombatState()
     {
-        // State Machine'i Idle'a çek
+        // YENİ: ReturnToIdle yerine zorlayıcı ForceIdle metodunu çağırıyoruz
         if (TryGetComponent(out FighterStateMachine stateMachine))
-            stateMachine.ReturnToIdle();
+            stateMachine.ForceIdle(); 
 
-        // Varsa devam eden saldırıları iptal et
         if (TryGetComponent(out FighterCombat combat))
             combat.CancelAttack();
 
-        // Hit Reaction (Darbe) durumlarını temizle
         if (TryGetComponent(out FighterHitReaction hitReaction))
             hitReaction.CancelReaction();
 
-        // Animator'u direkt Idle durumuna zorla
         if (animator != null && characterData != null)
         {
             animator.SetInteger(Animator.StringToHash("MoveDirection"), 0);

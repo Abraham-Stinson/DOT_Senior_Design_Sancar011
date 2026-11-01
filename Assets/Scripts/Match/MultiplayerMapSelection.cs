@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.InputSystem;
-using TMPro; 
+using TMPro;
 
 namespace GameProject.Runtime.Manager
 {
@@ -225,11 +225,17 @@ namespace GameProject.Runtime.Manager
             if (!p1MapLocked || !p2MapLocked)
                 return;
 
-            if (p1MapIndex != p2MapIndex)
-                return;
+            // YENİ MANTIK: Farklı haritalar seçildiyse ikisi arasından rastgele birini seç
+            int finalMapIndex = p1MapIndex;
 
-            MapData chosenMap = mapList[p1MapIndex];
-            Debug.Log($"Players selected: {chosenMap.displayName}");
+            if (p1MapIndex != p2MapIndex)
+            {
+                // %50 şansla p1MapIndex, %50 şansla p2MapIndex seçilir
+                finalMapIndex = (Random.value > 0.5f) ? p1MapIndex : p2MapIndex;
+            }
+
+            MapData chosenMap = mapList[finalMapIndex];
+            Debug.Log($"Final Map Selected: {chosenMap.displayName}");
 
             if (matchSpawner != null)
             {

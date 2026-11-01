@@ -1,4 +1,3 @@
-
 using UnityEngine;
 
 public enum FighterState
@@ -97,9 +96,16 @@ public class FighterStateMachine : MonoBehaviour
 
     public void ReturnToIdle()
     {
+        // Normal şartlarda KO olan biri Idle'a dönemez.
         if (CurrentState == FighterState.KO)
             return;
 
+        ChangeState(FighterState.Idle);
+    }
+
+    // YENİ: Round başlarken KO kilidini kırmak için
+    public void ForceIdle()
+    {
         ChangeState(FighterState.Idle);
     }
 
