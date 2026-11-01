@@ -1,32 +1,26 @@
 using System.Collections;
 using UnityEngine;
-using TMPro;
 
 namespace GameProject.Runtime.Manager
 {
     public class MatchSpawner : MonoBehaviour
     {
-        [Header("Camera Reference")]
+        [Header("Managers")]
         [Tooltip("Dinamik Arena Kamerası Scripti (MainCamera üzerinde olmalı)")]
         [SerializeField] private ArenaCamera arenaCamera;
-        [Header("HUD Reference")]
         [SerializeField] private PvPHUDManager pvpHUDManager;
+        [SerializeField] private RoundManager roundManager; // YENİ EKLENDİ
 
         [Header("Match Setup (World Coordinates)")]
-        [Tooltip("Player 1'in sahnede doğacağı koordinat")]
         [SerializeField] private Vector3 p1SpawnPosition = new Vector3(-4f, 0f, 0f);
-        [Tooltip("Player 2'nin sahnede doğacağı koordinat")]
         [SerializeField] private Vector3 p2SpawnPosition = new Vector3(4f, 0f, 0f);
 
         [Header("Arena Setup")]
-        [Tooltip("Arka plan için kullanılacak boş SpriteRenderer barındıran Prefab")]
         [SerializeField] private GameObject backgroundPrefab;
-
-        [Header("Countdown UI")]
-        [SerializeField] private TextMeshProUGUI countdownText;
 
         private CharacterData selectedP1Character;
         private CharacterData selectedP2Character;
+        private MapData currentSelectedMap; // Rematch için hafızada tutuyoruz
 
         private GameObject spawnedBackgroundInstance;
         private GameObject spawnedArenaInstance;
@@ -42,63 +36,52 @@ namespace GameProject.Runtime.Manager
         public void GenerateSubLevelAndFighters(MapData selectedMap)
         {
             ClearMatch();
+            currentSelectedMap = selectedMap;
 
-            if (selectedMap == null)
-            {
-                Debug.LogError("MatchSpawner: Seçilen MapData eksik!", this);
-                return;
-            }
+            if (selectedMap == null) return;
 
+            // Arka Plan
             if (backgroundPrefab != null && selectedMap.backgroundSprite != null)
             {
                 spawnedBackgroundInstance = Instantiate(backgroundPrefab, new Vector3(0f, 0f, 15f), Quaternion.identity);
-                spawnedBackgroundInstance.name = $"Background_{selectedMap.displayName}";
-
-                if (spawnedBackgroundInstance.TryGetComponent(out SpriteRenderer sr))
-                {
-                    sr.sprite = selectedMap.backgroundSprite;
-                }
+                if (spawnedBackgroundInstance.TryGetComponent(out SpriteRenderer sr)) sr.sprite = selectedMap.backgroundSprite;
             }
 
-            // B) 3D Sub-Level / Platform Prefab'ını Generate Et
+            // Zemin / Arena
             if (selectedMap.arenaPrefab != null)
             {
                 spawnedArenaInstance = Instantiate(selectedMap.arenaPrefab, Vector3.zero, Quaternion.identity);
-                spawnedArenaInstance.name = $"Arena_{selectedMap.displayName}";
             }
 
+            // Karakterler
             activePlayer1 = InstantiateFighter(selectedP1Character, p1SpawnPosition, FighterControlType.Player1, "Player1");
             activePlayer2 = InstantiateFighter(selectedP2Character, p2SpawnPosition, FighterControlType.Player2, "Player2");
 
-            if (activePlayer1 != null && activePlayer1.TryGetComponent(out FighterFacing p1Facing))
-                p1Facing.RefreshTarget();
+            // Karakter Bakışları
+            if (activePlayer1 != null && activePlayer1.TryGetComponent(out FighterFacing p1Facing)) p1Facing.RefreshTarget();
+            if (activePlayer2 != null && activePlayer2.TryGetComponent(out FighterFacing p2Facing)) p2Facing.RefreshTarget();
 
-            if (activePlayer2 != null && activePlayer2.TryGetComponent(out FighterFacing p2Facing))
-                p2Facing.RefreshTarget();
+            // HUD Bağlantısı
+            if (pvpHUDManager != null) pvpHUDManager.BindFightersToHUD(activePlayer1, activePlayer2);
 
-            //E) HUD ekranına karakterleri bağla
-            if (pvpHUDManager != null)
-            {
-                pvpHUDManager.BindFightersToHUD(activePlayer1, activePlayer2);
-            }
-
-            // YENİ: F) Dinamik Kameraya Hedefleri Ata
+            // Kamera Bağlantısı
             if (arenaCamera != null && activePlayer1 != null && activePlayer2 != null)
             {
                 arenaCamera.SetTargets(activePlayer1.transform, activePlayer2.transform);
             }
 
-            // G) Geri Sayımı Başlat (Kontrolleri kilitler)
-            StartCoroutine(MatchStartSequence());
+            // Round Sistemini Başlat
+            if (roundManager != null)
+            {
+                roundManager.Initialize(activePlayer1, activePlayer2, this);
+            }
         }
 
         private FighterController InstantiateFighter(CharacterData data, Vector3 spawnPos, FighterControlType controlType, string instanceName)
         {
             if (data == null || data.fighterPrefab == null) return null;
-
             GameObject fighterGO = Instantiate(data.fighterPrefab, spawnPos, Quaternion.identity);
             fighterGO.name = $"{instanceName}_{data.displayName}";
-
             if (fighterGO.TryGetComponent(out FighterController controller))
             {
                 controller.Initialize(data);
@@ -108,43 +91,32 @@ namespace GameProject.Runtime.Manager
             return null;
         }
 
-        private IEnumerator MatchStartSequence()
+        public void ResetFighterPositions()
         {
-            ToggleFighterControls(activePlayer1, false);
-            ToggleFighterControls(activePlayer2, false);
-
-            if (countdownText != null)
+            if (activePlayer1 != null)
             {
-                countdownText.gameObject.SetActive(true);
-                countdownText.text = "3";
-                yield return new WaitForSeconds(1f);
-                countdownText.text = "2";
-                yield return new WaitForSeconds(1f);
-                countdownText.text = "1";
-                yield return new WaitForSeconds(1f);
-                countdownText.text = "FIGHT!";
-            }
-            else
-            {
-                yield return new WaitForSeconds(3f);
+                activePlayer1.transform.position = p1SpawnPosition;
+                activePlayer1.ResetCombatState(); 
             }
 
-            ToggleFighterControls(activePlayer1, true);
-            ToggleFighterControls(activePlayer2, true);
-
-            if (countdownText != null)
+            if (activePlayer2 != null)
             {
-                yield return new WaitForSeconds(1f);
-                countdownText.gameObject.SetActive(false);
+                activePlayer2.transform.position = p2SpawnPosition;
+                activePlayer2.ResetCombatState(); 
             }
+
+            // Yönlerini tekrar ortala
+            if (activePlayer1 != null && activePlayer1.TryGetComponent(out FighterFacing p1Facing)) p1Facing.RefreshTarget();
+            if (activePlayer2 != null && activePlayer2.TryGetComponent(out FighterFacing p2Facing)) p2Facing.RefreshTarget();
         }
 
-        private void ToggleFighterControls(FighterController fighter, bool canControl)
+        // Rematch butonu için
+        public void RestartCurrentMatch()
         {
-            if (fighter == null) return;
-            if (fighter.TryGetComponent(out FighterMotor motor)) motor.enabled = canControl;
-            if (fighter.TryGetComponent(out FighterCombat combat)) combat.enabled = canControl;
-            if (fighter.TryGetComponent(out FighterDefense defense)) defense.enabled = canControl;
+            if (currentSelectedMap != null)
+            {
+                GenerateSubLevelAndFighters(currentSelectedMap);
+            }
         }
 
         public void ClearMatch()

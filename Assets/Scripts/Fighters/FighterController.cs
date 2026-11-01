@@ -152,6 +152,28 @@ public class FighterController : MonoBehaviour
         OnHealthChanged?.Invoke(currentHealth, MaxHealth);
     }
 
+    public void ResetCombatState()
+    {
+        // State Machine'i Idle'a çek
+        if (TryGetComponent(out FighterStateMachine stateMachine))
+            stateMachine.ReturnToIdle();
+
+        // Varsa devam eden saldırıları iptal et
+        if (TryGetComponent(out FighterCombat combat))
+            combat.CancelAttack();
+
+        // Hit Reaction (Darbe) durumlarını temizle
+        if (TryGetComponent(out FighterHitReaction hitReaction))
+            hitReaction.CancelReaction();
+
+        // Animator'u direkt Idle durumuna zorla
+        if (animator != null && characterData != null)
+        {
+            animator.SetInteger(Animator.StringToHash("MoveDirection"), 0);
+            animator.Play(characterData.idleAnimatorStateName, 0, 0f);
+        }
+    }
+
     private void Reset()
     {
         animator = GetComponentInChildren<Animator>();

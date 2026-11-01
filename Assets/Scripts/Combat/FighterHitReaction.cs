@@ -14,10 +14,12 @@ public class FighterHitReaction : MonoBehaviour
     [SerializeField] private FighterMotor motor;
 
     [Header("Animation")]
-    [SerializeField] private string hitAnimatorStateName =
+    [SerializeField]
+    private string hitAnimatorStateName =
         "Sancar_HitReaction";
 
-    [SerializeField] private string idleAnimatorStateName =
+    [SerializeField]
+    private string idleAnimatorStateName =
         "Sancar_Idle";
 
     [Header("Safety")]
@@ -203,7 +205,14 @@ public class FighterHitReaction : MonoBehaviour
             reactionAnimationFinished = true;
         }
     }
-
+    public void CancelReaction()
+    {
+        reacting = false;
+        stunFramesRemaining = 0;
+        reactionAnimationObserved = false;
+        reactionAnimationFinished = false;
+        reactionElapsedTime = 0f;
+    }
     private void FinishReaction()
     {
         if (!reacting)
