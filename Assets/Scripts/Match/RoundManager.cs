@@ -25,7 +25,7 @@ namespace GameProject.Runtime.Manager
         [SerializeField] private TextMeshProUGUI centerAnnouncementText; // "P1 Wins", "FIGHT!" vs. yazacak text
 
         [Header("UI - Match Over Screen")]
-        [SerializeField] private GameObject matchOverPanel; // Oyun bitince açılacak ekran (Rövanş, Ana Menü butonları burada olacak)
+        // NOT: Match Over panelinin açılıp kapanmasını artık UIManager (PVPM_MATCHOVER state'i) yönetiyor.
         [SerializeField] private TextMeshProUGUI matchWinnerNameText; // Match Over ekranında kimin kazandığını yazan text
 
         private FighterController player1;
@@ -40,20 +40,51 @@ namespace GameProject.Runtime.Manager
 
         public void Initialize(FighterController p1, FighterController p2, MatchSpawner spawner)
         {
+            // Önceki maçtan kalan abonelik ve coroutine'leri temizle (Rematch durumunda önemli)
+            StopMatch();
+
             player1 = p1;
             player2 = p2;
             matchSpawner = spawner;
+
+            if (player1 == null || player2 == null)
+            {
+                Debug.LogWarning($"{nameof(RoundManager)}: Fighter eksik, round sistemi başlatılamadı.");
+                return;
+            }
 
             p1RoundsWon = 0;
             p2RoundsWon = 0;
             UpdateRoundIcons();
 
-            if (matchOverPanel != null) matchOverPanel.SetActive(false);
-
             player1.OnHealthChanged += CheckHealthKO;
             player2.OnHealthChanged += CheckHealthKO;
 
             StartRoundSequence();
+        }
+
+        /// <summary>
+        /// Maçı tamamen durdurur: coroutine'ler, event abonelikleri ve duyuru yazısı temizlenir.
+        /// MatchSpawner.ClearMatch() tarafından karakterler yok edilmeden önce çağrılır.
+        /// </summary>
+        public void StopMatch()
+        {
+            isRoundActive = false;
+            StopAllCoroutines();
+            roundTimerCoroutine = null;
+
+            UnsubscribeFromPlayers();
+            player1 = null;
+            player2 = null;
+
+            if (centerAnnouncementText != null)
+                centerAnnouncementText.gameObject.SetActive(false);
+        }
+
+        private void UnsubscribeFromPlayers()
+        {
+            if (player1 != null) player1.OnHealthChanged -= CheckHealthKO;
+            if (player2 != null) player2.OnHealthChanged -= CheckHealthKO;
         }
 
         private void StartRoundSequence()
@@ -232,15 +263,15 @@ namespace GameProject.Runtime.Manager
 
         private void EndMatch(FighterController matchWinner)
         {
-            if (matchOverPanel != null)
+            if (matchWinnerNameText != null && matchWinner != null)
             {
-                matchOverPanel.SetActive(true);
-                if (matchWinnerNameText != null)
-                {
-                    string playerSide = (matchWinner == player1) ? "PLAYER 1" : "PLAYER 2";
-                    matchWinnerNameText.text = $"{playerSide}\n{matchWinner.Data.displayName}\nWINS THE MATCH!";
-                }
+                string playerSide = (matchWinner == player1) ? "PLAYER 1" : "PLAYER 2";
+                matchWinnerNameText.text = $"{playerSide}\n{matchWinner.Data.displayName}\nWINS THE MATCH!";
             }
+
+            // Arena ve karakterler panelin arkasında görünmeye devam eder (kontroller kapalı).
+            // Panel butonlarından biri seçilince temizlenirler.
+            GameManager.instance.SetGameState(EGameState.PVPM_MATCHOVER);
         }
 
        private void ToggleControls(bool canControl)
@@ -270,28 +301,31 @@ namespace GameProject.Runtime.Manager
 
         private void OnDestroy()
         {
-            if (player1 != null) player1.OnHealthChanged -= CheckHealthKO;
-            if (player2 != null) player2.OnHealthChanged -= CheckHealthKO;
+            UnsubscribeFromPlayers();
         }
         
         // --- MATCH OVER EKRANI BUTONLARI İÇİN METOTLAR ---
         
         public void Btn_Rematch()
         {
-            // Mevcut harita ve karakterlerle maçı baştan başlat
-            matchSpawner.RestartCurrentMatch(); 
+            if (matchSpawner == null) return;
+
+            // Önce state'i değiştir (HUD tekrar açılsın), sonra maçı baştan başlat.
+            // Sıra önemli: RoundManager HUD altında duruyorsa, inaktifken coroutine başlatılamaz.
+            GameManager.instance.SetGameState(EGameState.PVPM_PLAYSCREEN);
+            matchSpawner.RestartCurrentMatch();
         }
 
         public void Btn_CharacterSelection()
         {
-            matchSpawner.ClearMatch();
+            if (matchSpawner != null) matchSpawner.ClearMatch();
             GameManager.instance.SetGameState(EGameState.PVPM_MENU_CHARACTERSELECTION);
         }
 
         public void Btn_MainMenu()
         {
-            matchSpawner.ClearMatch();
-            GameManager.instance.SetGameState(EGameState.PLAYMODESELECTION); // Veya ana menü state'in hangisiyse
+            if (matchSpawner != null) matchSpawner.ClearMatch();
+            GameManager.instance.SetGameState(EGameState.PLAYMODESELECTION);
         }
     }
 }

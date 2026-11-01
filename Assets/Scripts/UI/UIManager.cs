@@ -22,6 +22,10 @@ namespace GameProject.Runtime.Manager
         [Header("ENDGAME")]
         [SerializeField] private GameObject winScreenUI;
         [SerializeField] private GameObject loseScreenUI;
+        [Tooltip("PvP maç sonu ekranı (Rematch / Character Selection / Main Menu butonları)")]
+        [SerializeField] private GameObject pvpMatchOverScreenUI;
+        [Tooltip("Maç sonu ekranında PvP HUD'u (can barları, round ikonları) arkada görünür kalsın mı?")]
+        [SerializeField] private bool keepPvPHUDOnMatchOver = true;
 
         private void Awake()
         {
@@ -72,6 +76,10 @@ namespace GameProject.Runtime.Manager
                 case EGameState.LOSE:
                     if (loseScreenUI) loseScreenUI.SetActive(true);
                     break;
+                case EGameState.PVPM_MATCHOVER:
+                    if (keepPvPHUDOnMatchOver && pvpPlayScreenUI) pvpPlayScreenUI.SetActive(true);
+                    if (pvpMatchOverScreenUI) pvpMatchOverScreenUI.SetActive(true);
+                    break;
             }
         }
 
@@ -87,6 +95,7 @@ namespace GameProject.Runtime.Manager
             if (pauseMenuUI) pauseMenuUI.SetActive(false);
             if (winScreenUI) winScreenUI.SetActive(false);
             if (loseScreenUI) loseScreenUI.SetActive(false);
+            if (pvpMatchOverScreenUI) pvpMatchOverScreenUI.SetActive(false);
         }
 
         public void ShowPlayModeSelection() => GameManager.instance.SetGameState(EGameState.PLAYMODESELECTION);

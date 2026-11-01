@@ -27,6 +27,8 @@ namespace GameProject.Runtime.Manager
         private FighterController activePlayer1;
         private FighterController activePlayer2;
 
+        public bool HasActiveMatch => activePlayer1 != null || activePlayer2 != null || spawnedArenaInstance != null || spawnedBackgroundInstance != null;
+
         public void SetSelectedCharacters(CharacterData p1Data, CharacterData p2Data)
         {
             selectedP1Character = p1Data;
@@ -119,12 +121,26 @@ namespace GameProject.Runtime.Manager
             }
         }
 
+        /// <summary>
+        /// Sahnedeki arena, arka plan ve karakterleri yok eder.
+        /// Destroy'dan ÖNCE tüm referans tutan sistemler (Round, HUD, Kamera) serbest bırakılır,
+        /// böylece yok edilmiş objelere erişim (MissingReferenceException) oluşmaz.
+        /// </summary>
         public void ClearMatch()
         {
+            if (roundManager != null) roundManager.StopMatch();
+            if (pvpHUDManager != null) pvpHUDManager.UnbindFighters();
+            if (arenaCamera != null) arenaCamera.ClearTargets();
+
             if (activePlayer1 != null) Destroy(activePlayer1.gameObject);
             if (activePlayer2 != null) Destroy(activePlayer2.gameObject);
             if (spawnedArenaInstance != null) Destroy(spawnedArenaInstance);
             if (spawnedBackgroundInstance != null) Destroy(spawnedBackgroundInstance);
+
+            activePlayer1 = null;
+            activePlayer2 = null;
+            spawnedArenaInstance = null;
+            spawnedBackgroundInstance = null;
         }
     }
 }

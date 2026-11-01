@@ -63,10 +63,12 @@ namespace GameProject.Runtime.Manager
             }
         }
 
-        private void UnbindFighters()
+        public void UnbindFighters()
         {
             if (boundPlayer1 != null) boundPlayer1.OnHealthChanged -= UpdateP1HealthUI;
             if (boundPlayer2 != null) boundPlayer2.OnHealthChanged -= UpdateP2HealthUI;
+            boundPlayer1 = null;
+            boundPlayer2 = null;
         }
 
         private void OnDestroy()

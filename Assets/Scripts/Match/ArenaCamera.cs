@@ -31,6 +31,9 @@ namespace GameProject.Runtime.Manager
 
         private void LateUpdate()
         {
+            // Yok edilmiş (Destroy) hedefleri listeden ayıkla
+            targets.RemoveAll(t => t == null);
+
             if (targets.Count == 0 || cam == null)
                 return;
 
@@ -79,6 +82,13 @@ namespace GameProject.Runtime.Manager
             Bounds bounds = new Bounds(targets[0].position, Vector3.zero);
             bounds.Encapsulate(targets[1].position);
             return bounds.size.x;
+        }
+
+        public void ClearTargets()
+        {
+            targets.Clear();
+            velocity = Vector3.zero;
+            zoomVelocity = 0f;
         }
 
         public void SetTargets(Transform p1, Transform p2)
