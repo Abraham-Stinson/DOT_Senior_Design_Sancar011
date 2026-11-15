@@ -15,5 +15,10 @@ MonoBehaviour:
   mapID: 1
   displayName: MidTown
   mapPortrait: {fileID: 1472453544262575493, guid: 9fa88a150637cce43b60d534ae7866d7, type: 3}
+  environment3DPrefab: {fileID: 0}
+  environment3DSpawnPosition: {x: 0, y: 0, z: 0}
+  environment3DSpawnRotation: {x: 0, y: 0, z: 0}
+  environment3DScale: {x: 1, y: 1, z: 1}
+  hide2DElementsWhen3DAssigned: 1
   backgroundSprite: {fileID: 1472453544262575493, guid: 9fa88a150637cce43b60d534ae7866d7, type: 3}
   arenaPrefab: {fileID: 5551002520122876218, guid: d207500e1f5b9144eb883aaed3fe4982, type: 3}

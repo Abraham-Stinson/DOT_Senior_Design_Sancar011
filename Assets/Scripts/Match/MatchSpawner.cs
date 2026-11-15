@@ -9,7 +9,7 @@ namespace GameProject.Runtime.Manager
         [Tooltip("Dinamik Arena Kamerası Scripti (MainCamera üzerinde olmalı)")]
         [SerializeField] private ArenaCamera arenaCamera;
         [SerializeField] private PvPHUDManager pvpHUDManager;
-        [SerializeField] private RoundManager roundManager; // YENİ EKLENDİ
+        [SerializeField] private RoundManager roundManager;
 
         [Header("Match Setup (World Coordinates)")]
         [SerializeField] private Vector3 p1SpawnPosition = new Vector3(-3.5f, 0f, 0f);
@@ -22,12 +22,18 @@ namespace GameProject.Runtime.Manager
         private CharacterData selectedP2Character;
         private MapData currentSelectedMap; // Rematch için hafızada tutuyoruz
 
+        private GameObject spawnedEnvironment3DInstance;
         private GameObject spawnedBackgroundInstance;
         private GameObject spawnedArenaInstance;
         private FighterController activePlayer1;
         private FighterController activePlayer2;
 
-        public bool HasActiveMatch => activePlayer1 != null || activePlayer2 != null || spawnedArenaInstance != null || spawnedBackgroundInstance != null;
+        public bool HasActiveMatch =>
+            activePlayer1 != null ||
+            activePlayer2 != null ||
+            spawnedEnvironment3DInstance != null ||
+            spawnedArenaInstance != null ||
+            spawnedBackgroundInstance != null;
 
         public void SetSelectedCharacters(CharacterData p1Data, CharacterData p2Data)
         {
@@ -42,17 +48,43 @@ namespace GameProject.Runtime.Manager
 
             if (selectedMap == null) return;
 
-            // Arka Plan
-            if (backgroundPrefab != null && selectedMap.backgroundSprite != null)
+            bool has3DEnvironment = selectedMap.environment3DPrefab != null;
+
+            // 3D Arena / Sahne Modeli (Pivot noktası arenanın ortasında olduğu için doğrudan yerleşir)
+            if (has3DEnvironment)
             {
-                spawnedBackgroundInstance = Instantiate(backgroundPrefab, new Vector3(0f, 0f, 15f), Quaternion.identity);
-                if (spawnedBackgroundInstance.TryGetComponent(out SpriteRenderer sr)) sr.sprite = selectedMap.backgroundSprite;
+                Quaternion rotation = Quaternion.Euler(selectedMap.environment3DSpawnRotation);
+                spawnedEnvironment3DInstance = Instantiate(
+                    selectedMap.environment3DPrefab,
+                    selectedMap.environment3DSpawnPosition,
+                    rotation
+                );
+                spawnedEnvironment3DInstance.name = $"Environment3D_{selectedMap.displayName}";
+
+                Vector3 customScale = selectedMap.environment3DScale;
+                if (customScale.sqrMagnitude > 0.0001f)
+                {
+                    spawnedEnvironment3DInstance.transform.localScale = customScale;
+                }
             }
 
-            // Zemin / Arena
-            if (selectedMap.arenaPrefab != null)
+            bool spawn2DFallback = !has3DEnvironment || !selectedMap.hide2DElementsWhen3DAssigned;
+
+            if (spawn2DFallback)
             {
-                spawnedArenaInstance = Instantiate(selectedMap.arenaPrefab, Vector3.zero, Quaternion.identity);
+                // 2D Arka Plan (Placeholder / Fallback)
+                if (backgroundPrefab != null && selectedMap.backgroundSprite != null)
+                {
+                    spawnedBackgroundInstance = Instantiate(backgroundPrefab, new Vector3(0f, 0f, 15f), Quaternion.identity);
+                    if (spawnedBackgroundInstance.TryGetComponent(out SpriteRenderer sr))
+                        sr.sprite = selectedMap.backgroundSprite;
+                }
+
+                // 2D/Test Zemin Küpü (ArenaFloor)
+                if (selectedMap.arenaPrefab != null)
+                {
+                    spawnedArenaInstance = Instantiate(selectedMap.arenaPrefab, Vector3.zero, Quaternion.identity);
+                }
             }
 
             // Karakterler
@@ -125,7 +157,7 @@ namespace GameProject.Runtime.Manager
         }
 
         /// <summary>
-        /// Sahnedeki arena, arka plan ve karakterleri yok eder.
+        /// Sahnedeki 3D/2D arena, arka plan ve karakterleri yok eder.
         /// Destroy'dan ÖNCE tüm referans tutan sistemler (Round, HUD, Kamera) serbest bırakılır,
         /// böylece yok edilmiş objelere erişim (MissingReferenceException) oluşmaz.
         /// </summary>
@@ -137,11 +169,13 @@ namespace GameProject.Runtime.Manager
 
             if (activePlayer1 != null) Destroy(activePlayer1.gameObject);
             if (activePlayer2 != null) Destroy(activePlayer2.gameObject);
+            if (spawnedEnvironment3DInstance != null) Destroy(spawnedEnvironment3DInstance);
             if (spawnedArenaInstance != null) Destroy(spawnedArenaInstance);
             if (spawnedBackgroundInstance != null) Destroy(spawnedBackgroundInstance);
 
             activePlayer1 = null;
             activePlayer2 = null;
+            spawnedEnvironment3DInstance = null;
             spawnedArenaInstance = null;
             spawnedBackgroundInstance = null;
         }

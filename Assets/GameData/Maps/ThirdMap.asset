@@ -15,5 +15,10 @@ MonoBehaviour:
   mapID: 3
   displayName: Pis Mutfak
   mapPortrait: {fileID: -4650190030548998843, guid: 5593875593b3d2f42ab901595d65def2, type: 3}
+  environment3DPrefab: {fileID: 919132149155446097, guid: 84e36c67187e8d344945c8d5a79cc902, type: 3}
+  environment3DSpawnPosition: {x: 0, y: 0, z: 2.15}
+  environment3DSpawnRotation: {x: 0, y: 180, z: 0}
+  environment3DScale: {x: 1, y: 1, z: 1}
+  hide2DElementsWhen3DAssigned: 1
   backgroundSprite: {fileID: -4650190030548998843, guid: 5593875593b3d2f42ab901595d65def2, type: 3}
   arenaPrefab: {fileID: 5551002520122876218, guid: d207500e1f5b9144eb883aaed3fe4982, type: 3}
