@@ -323,6 +323,7 @@ MonoBehaviour:
   blockEndState: Sancar_BlockEnd
   idleState: Sancar_Idle
   blockStunFrames: 10
+  blockedDamagePercentage: 20
   showDebugLogs: 1
 --- !u!114 &3959367750735170325
 MonoBehaviour:
@@ -337,7 +338,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FighterPushback
   pushDuration: 0.15
-  blockedPushMultiplier: 0.35
+  blockedPushMultiplier: 0.5
+  minimumBlockedPushDistance: 0.18
   minX: -8
   maxX: 8
   showDebugLogs: 0

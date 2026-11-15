@@ -15,7 +15,7 @@ MonoBehaviour:
   attackID: heavy_kick
   displayName: Heavy Kick
   attackType: 3
-  range: 2
+  range: 1.6
   damage: 80
   attackRange: 1.5
   startupFrames: 23

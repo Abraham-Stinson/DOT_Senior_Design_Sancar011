@@ -12,8 +12,8 @@ namespace GameProject.Runtime.Manager
         [SerializeField] private RoundManager roundManager; // YENİ EKLENDİ
 
         [Header("Match Setup (World Coordinates)")]
-        [SerializeField] private Vector3 p1SpawnPosition = new Vector3(-4f, 0f, 0f);
-        [SerializeField] private Vector3 p2SpawnPosition = new Vector3(4f, 0f, 0f);
+        [SerializeField] private Vector3 p1SpawnPosition = new Vector3(-3.5f, 0f, 0f);
+        [SerializeField] private Vector3 p2SpawnPosition = new Vector3(3.5f, 0f, 0f);
 
         [Header("Arena Setup")]
         [SerializeField] private GameObject backgroundPrefab;
@@ -110,6 +110,9 @@ namespace GameProject.Runtime.Manager
             // Yönlerini tekrar ortala
             if (activePlayer1 != null && activePlayer1.TryGetComponent(out FighterFacing p1Facing)) p1Facing.RefreshTarget();
             if (activePlayer2 != null && activePlayer2.TryGetComponent(out FighterFacing p2Facing)) p2Facing.RefreshTarget();
+
+            if (arenaCamera != null)
+                arenaCamera.SnapToTargets();
         }
 
         // Rematch butonu için

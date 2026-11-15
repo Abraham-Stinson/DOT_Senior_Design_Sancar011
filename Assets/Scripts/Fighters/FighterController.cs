@@ -161,6 +161,14 @@ public class FighterController : MonoBehaviour
         if (TryGetComponent(out FighterHitReaction hitReaction))
             hitReaction.CancelReaction();
 
+        if (TryGetComponent(out FighterDefense defense))
+            defense.CancelGuard();
+
+        // An unfinished pushback must not move the fighter
+        // after it has been placed at its spawn position.
+        if (TryGetComponent(out FighterPushback pushback))
+            pushback.StopPushback();
+
         if (animator != null && characterData != null)
         {
             animator.SetInteger(Animator.StringToHash("MoveDirection"), 0);

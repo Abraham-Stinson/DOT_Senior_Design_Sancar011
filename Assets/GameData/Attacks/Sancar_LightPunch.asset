@@ -15,7 +15,7 @@ MonoBehaviour:
   attackID: light_punch
   displayName: Light Punch
   attackType: 0
-  range: 1.2
+  range: 1
   damage: 35
   attackRange: 1.5
   startupFrames: 14

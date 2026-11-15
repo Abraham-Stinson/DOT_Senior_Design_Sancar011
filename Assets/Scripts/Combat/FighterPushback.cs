@@ -10,7 +10,10 @@ public class FighterPushback : MonoBehaviour
     [SerializeField] private float pushDuration = 0.15f;
 
     [Range(0f, 1f)]
-    [SerializeField] private float blockedPushMultiplier = 0.35f;
+    [SerializeField] private float blockedPushMultiplier = 0.5f;
+
+    [Min(0f)]
+    [SerializeField] private float minimumBlockedPushDistance = 0.18f;
 
     [Header("Arena Limits")]
     [SerializeField] private float minX = -8f;
@@ -36,7 +39,12 @@ public class FighterPushback : MonoBehaviour
         float finalDistance = Mathf.Max(0f, distance);
 
         if (wasBlocked)
-            finalDistance *= blockedPushMultiplier;
+        {
+            finalDistance = Mathf.Max(
+                finalDistance * blockedPushMultiplier,
+                minimumBlockedPushDistance
+            );
+        }
 
         if (finalDistance <= 0f)
             return;

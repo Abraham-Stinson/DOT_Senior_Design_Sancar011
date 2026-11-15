@@ -106,6 +106,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GameProject.Runtime.Manager.ArenaBackground
   yOffset: 0
   zDistance: 15
-  parallaxFactor: 0.9
-  autoScaleToCamera: 0
-  overscaleMargin: 1.05
+  parallaxFactor: 0.85
+  autoScaleToCamera: 1
+  overscaleMargin: 1.25

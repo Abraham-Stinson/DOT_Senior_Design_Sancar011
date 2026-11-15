@@ -22,6 +22,13 @@ public class FighterHitbox : MonoBehaviour
     private readonly HashSet<FighterController> hitTargets
         = new HashSet<FighterController>();
 
+    // Reused every physics step: avoids allocating a new array
+    // (OverlapBoxAll) on every FixedUpdate while the hit window is open.
+    private readonly List<Collider2D> overlapResults =
+        new List<Collider2D>(16);
+
+    private ContactFilter2D overlapFilter;
+
     private bool wasHitWindowOpen;
 
     private void Awake()
@@ -34,6 +41,10 @@ public class FighterHitbox : MonoBehaviour
 
         if (hitOrigin == null)
             hitOrigin = transform;
+
+        // Hurtboxes are triggers, so the query must include triggers.
+        overlapFilter = new ContactFilter2D().NoFilter();
+        overlapFilter.useTriggers = true;
     }
 
     private void FixedUpdate()
@@ -80,15 +91,17 @@ public class FighterHitbox : MonoBehaviour
         // Make sure collider positions are current.
         Physics2D.SyncTransforms();
 
-        Collider2D[] overlaps =
-            Physics2D.OverlapBoxAll(center, size, 0f);
+        int count = Physics2D.OverlapBox(
+            center, size, 0f, overlapFilter, overlapResults
+        );
 
-        foreach (Collider2D overlap in overlaps)
+        for (int i = 0; i < count; i++)
         {
-            FighterHurtbox hurtbox =
-                overlap.GetComponent<FighterHurtbox>();
+            Collider2D overlap = overlapResults[i];
 
-            if (hurtbox == null)
+            // Only dedicated hurtbox colliders can receive hits.
+            if (overlap == null ||
+                !overlap.TryGetComponent(out FighterHurtbox hurtbox))
                 continue;
 
             FighterController target = hurtbox.Owner;
@@ -141,13 +154,14 @@ public class FighterHitbox : MonoBehaviour
         FighterDefense defense,
         AttackData attack)
     {
-        defense.ReceiveBlockedHit();
+        int chipDamage = defense.ReceiveBlockedHit(attack.damage);
 
         // Reduced pushback when the attack is blocked.
         ApplyPushback(target, attack, true);
 
         Debug.Log(
-            $"{fighter.name}: ATTACK BLOCKED by {target.name}",
+            $"{fighter.name}: ATTACK BLOCKED by {target.name} " +
+            $"(Chip Damage: {chipDamage}, Remaining HP: {target.CurrentHealth})",
             this
         );
     }

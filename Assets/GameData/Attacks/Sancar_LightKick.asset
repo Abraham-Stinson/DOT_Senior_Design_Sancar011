@@ -15,7 +15,7 @@ MonoBehaviour:
   attackID: light_kick
   displayName: Light Kick
   attackType: 2
-  range: 1.7
+  range: 1.4
   damage: 45
   attackRange: 1.5
   startupFrames: 11

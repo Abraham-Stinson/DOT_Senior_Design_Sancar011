@@ -34,9 +34,16 @@ public class FighterDefense : MonoBehaviour
     [SerializeField] private string idleState =
         "Sancar_Idle";
 
-    [Header("BlockStun")]
+    [Header("Block Settings")]
     [Min(1)]
     [SerializeField] private int blockStunFrames = 10;
+
+    [Tooltip(
+        "Percentage of incoming attack damage taken while blocking " +
+        "(chip damage). For example, 20 means 20% of the damage is taken."
+    )]
+    [Range(0f, 100f)]
+    [SerializeField] private float blockedDamagePercentage = 20f;
 
     [Header("Debug")]
     [SerializeField] private bool showDebugLogs = true;
@@ -175,16 +182,34 @@ public class FighterDefense : MonoBehaviour
     }
 
     // Called by FighterHitbox when an attack is blocked.
-    public void ReceiveBlockedHit()
+    public int ReceiveBlockedHit(int incomingDamage = 0)
     {
         if (!IsGuarding || !fighter.IsAlive)
-            return;
+            return 0;
+
+        int chipDamage = CalculateBlockedDamage(incomingDamage);
+
+        if (chipDamage > 0)
+            fighter.ReceiveDamage(chipDamage);
+
+        motor?.StopMovement();
+
+        if (!fighter.IsAlive)
+        {
+            phase = DefensePhase.None;
+            stunRemaining = 0;
+            stateMachine.EnterKO();
+
+            if (showDebugLogs)
+                Debug.Log($"{name}: KO ON BLOCK", this);
+
+            return chipDamage;
+        }
 
         phase = DefensePhase.BlockStun;
         stunRemaining = blockStunFrames;
 
         stateMachine.EnterBlockStun();
-        motor?.StopMovement();
 
         // Keep the guard pose during blockstun.
         PlayPhaseAnimation(blockHoldState);
@@ -193,10 +218,22 @@ public class FighterDefense : MonoBehaviour
         {
             Debug.Log(
                 $"{name}: BLOCK SUCCESS - " +
+                $"{chipDamage} chip damage, " +
                 $"{stunRemaining} stun frames",
                 this
             );
         }
+
+        return chipDamage;
+    }
+
+    private int CalculateBlockedDamage(int incomingDamage)
+    {
+        if (incomingDamage <= 0 || blockedDamagePercentage <= 0f)
+            return 0;
+
+        float rawDamage = incomingDamage * (blockedDamagePercentage * 0.01f);
+        return Mathf.Max(1, Mathf.RoundToInt(rawDamage));
     }
 
     private void FinishBlockStun()
@@ -298,6 +335,14 @@ public class FighterDefense : MonoBehaviour
         }
 
         return false;
+    }
+
+    public void CancelGuard()
+    {
+        phase = DefensePhase.None;
+        stunRemaining = 0;
+        stateObserved = false;
+        phaseElapsed = 0f;
     }
 
     private void OnDisable()

@@ -3770,8 +3770,8 @@ MonoBehaviour:
   arenaCamera: {fileID: 1670036502}
   pvpHUDManager: {fileID: 1458035269}
   roundManager: {fileID: 410055604}
-  p1SpawnPosition: {x: -7, y: 0, z: 0}
-  p2SpawnPosition: {x: 7, y: 0, z: 0}
+  p1SpawnPosition: {x: -3.5, y: 0, z: 0}
+  p2SpawnPosition: {x: 3.5, y: 0, z: 0}
   backgroundPrefab: {fileID: 4477902250903147162, guid: a87bf2a1fbaa2184a851605bbddca3bb, type: 3}
 --- !u!1 &1454122649
 GameObject:
@@ -4466,8 +4466,8 @@ Camera:
     height: 1
   near clip plane: 0.1
   far clip plane: 1000
-  field of view: 60
-  orthographic: 1
+  field of view: 35
+  orthographic: 0
   orthographic size: 4.5
   m_Depth: -1
   m_CullingMask:
@@ -4512,13 +4512,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameProject.Runtime.Manager.ArenaCamera
   targets: []
+  usePerspective: 1
+  fieldOfView: 35
+  pitchAngle: 3
   offset: {x: 0, y: 2, z: -10}
-  minX: -6
-  maxX: 6
-  minZoom: 2
-  maxZoom: 5
-  zoomLimiter: 8
-  smoothTime: 0.3
+  minX: -4.5
+  maxX: 4.5
+  minZoom: 2.6
+  maxZoom: 3.8
+  zoomLimiter: 9
+  smoothTime: 0.14
+  constrainTargetsToScreen: 1
+  screenEdgePadding: 1.15
 --- !u!1 &1693534588
 GameObject:
   m_ObjectHideFlags: 0
