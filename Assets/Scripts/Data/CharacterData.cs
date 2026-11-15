@@ -15,6 +15,8 @@ public class CharacterData : ScriptableObject
 
     [Header("Presentation")]
     public Sprite portrait;
+    [Tooltip("Seçim ekranında gösterilecek tam boy önizleme görseli (Boş bırakılırsa fighterPrefab / Animator'dan otomatik alınır)")]
+    public Sprite previewSprite;
     public GameObject fighterPrefab;
     public RuntimeAnimatorController animatorController;
     public string idleAnimatorStateName = "Sancar_Idle";

@@ -35,6 +35,9 @@ namespace GameProject.Runtime.Manager
             spawnedArenaInstance != null ||
             spawnedBackgroundInstance != null;
 
+        public CharacterData SelectedP1Character => selectedP1Character;
+        public CharacterData SelectedP2Character => selectedP2Character;
+
         public void SetSelectedCharacters(CharacterData p1Data, CharacterData p2Data)
         {
             selectedP1Character = p1Data;

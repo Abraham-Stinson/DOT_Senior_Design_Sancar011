@@ -974,8 +974,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 700, y: 700}
+  m_AnchoredPosition: {x: 0, y: -10}
+  m_SizeDelta: {x: 560, y: 520}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &371799711
 MonoBehaviour:
@@ -984,7 +984,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 371799709}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 31a19414c41e5ae4aae2af33fee712f6, type: 3}
   m_Name: 
@@ -3108,9 +3108,13 @@ MonoBehaviour:
   p1PanelParent: {fileID: 1978475161}
   p2PanelParent: {fileID: 1693534589}
   characterSlotPrefab: {fileID: 5799372048856892494, guid: a59c24cb61365af428e24f5f500577c7, type: 3}
-  unselectedColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  unselectedColor: {r: 0.68, g: 0.7, b: 0.76, a: 1}
   highlightedColor: {r: 1, g: 1, b: 1, a: 1}
-  lockedColor: {r: 0, g: 1, b: 0, a: 1}
+  lockedColor: {r: 1, g: 1, b: 1, a: 1}
+  p1BorderColor: {r: 0.15, g: 0.68, b: 1, a: 1}
+  p2BorderColor: {r: 1, g: 0.22, b: 0.3, a: 1}
+  lockedBorderTint: {r: 1, g: 0.88, b: 0.32, a: 1}
+  p1PreviewOnRightSide: 0
   matchSpawner: {fileID: 1438718015}
   p1NameText: {fileID: 2126786045}
   p1ReadyText: {fileID: 650622770}
@@ -4416,7 +4420,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1693534589
 RectTransform:
   m_ObjectHideFlags: 0
@@ -5236,11 +5240,12 @@ MonoBehaviour:
   - {fileID: 11400000, guid: dc40ff036803be0478dc49e0925fbf42, type: 2}
   mapPanelParent: {fileID: 371799710}
   mapSlotPrefab: {fileID: 5799372048856892494, guid: a59c24cb61365af428e24f5f500577c7, type: 3}
-  unselectedColor: {r: 0.45, g: 0.45, b: 0.45, a: 1}
+  unselectedColor: {r: 0.68, g: 0.7, b: 0.76, a: 1}
   highlightedColor: {r: 1, g: 1, b: 1, a: 1}
-  p1SelectedColor: {r: 0.2, g: 0.6, b: 1, a: 1}
-  p2SelectedColor: {r: 1, g: 0.3, b: 0.3, a: 1}
-  lockedColor: {r: 0.2, g: 1, b: 0.3, a: 1}
+  p1SelectedColor: {r: 0.15, g: 0.68, b: 1, a: 1}
+  p2SelectedColor: {r: 1, g: 0.22, b: 0.3, a: 1}
+  lockedColor: {r: 1, g: 0.88, b: 0.32, a: 1}
+  p1PreviewOnRightSide: 0
   p1MapNameText: {fileID: 189939313}
   p1ReadyText: {fileID: 221687954}
   p2MapNameText: {fileID: 1818589647}
@@ -5283,8 +5288,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -500, y: 0}
-  m_SizeDelta: {x: 700, y: 700}
+  m_AnchoredPosition: {x: 0, y: 15}
+  m_SizeDelta: {x: 560, y: 540}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1978475162
 MonoBehaviour:
@@ -5293,7 +5298,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1978475160}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 31a19414c41e5ae4aae2af33fee712f6, type: 3}
   m_Name: 
