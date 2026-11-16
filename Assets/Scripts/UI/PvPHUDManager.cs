@@ -20,11 +20,11 @@ namespace GameProject.Runtime.Manager
         [SerializeField] private float mainBarLerpSpeed = 14f;
         [SerializeField] private float trailDelay = 0.38f;
         [SerializeField] private float trailLerpSpeed = 2.8f;
-        [SerializeField] private Color fullHealthColor = new Color(0.18f, 0.92f, 0.42f, 1f);
-        [SerializeField] private Color midHealthColor = new Color(1f, 0.78f, 0.15f, 1f);
-        [SerializeField] private Color lowHealthColor = new Color(0.95f, 0.18f, 0.22f, 1f);
-        [SerializeField] private Color damageTrailColor = new Color(1f, 0.28f, 0.18f, 0.92f);
-        [SerializeField] private Color barBackgroundColor = new Color(0.08f, 0.09f, 0.14f, 0.95f);
+        [SerializeField] private Color fullHealthColor = new Color(0.22f, 0.76f, 0.38f, 1f);
+        [SerializeField] private Color midHealthColor = new Color(0.88f, 0.64f, 0.16f, 1f);
+        [SerializeField] private Color lowHealthColor = new Color(0.82f, 0.16f, 0.16f, 1f);
+        [SerializeField] private Color damageTrailColor = new Color(0.92f, 0.78f, 0.28f, 0.85f);
+        [SerializeField] private Color barBackgroundColor = new Color(0.09f, 0.09f, 0.11f, 0.92f);
 
         private FighterController boundPlayer1;
         private FighterController boundPlayer2;
@@ -221,15 +221,15 @@ namespace GameProject.Runtime.Manager
                 // Kritik canda hafif nabız efekti
                 if (mainFill > 0f && mainFill <= 0.25f)
                 {
-                    float pulse = 0.5f + 0.5f * Mathf.Sin(Time.unscaledTime * 10f);
-                    targetColor = Color.Lerp(lowHealthColor, new Color(1f, 0.55f, 0.35f, 1f), pulse * 0.45f);
+                    float pulse = 0.5f + 0.5f * Mathf.Sin(Time.unscaledTime * 8f);
+                    targetColor = Color.Lerp(lowHealthColor, new Color(0.98f, 0.42f, 0.30f, 1f), pulse * 0.35f);
                 }
 
                 // Hasar anında kısa beyaz parlama
                 if (flashTime > 0f)
                 {
                     float flashFactor = Mathf.Clamp01(flashTime / 0.14f);
-                    targetColor = Color.Lerp(targetColor, Color.white, flashFactor * 0.65f);
+                    targetColor = Color.Lerp(targetColor, Color.white, flashFactor * 0.5f);
                 }
 
                 mainBar.color = targetColor;
@@ -268,7 +268,7 @@ namespace GameProject.Runtime.Manager
             Vector2 offset = Vector2.zero;
             if (flashTime > 0f)
             {
-                float intensity = (flashTime / 0.14f) * 5f;
+                float intensity = (flashTime / 0.14f) * 2.5f;
                 offset = new Vector2(
                     Mathf.Sin(Time.unscaledTime * 95f) * intensity,
                     Mathf.Cos(Time.unscaledTime * 120f) * intensity * 0.6f);
@@ -277,7 +277,7 @@ namespace GameProject.Runtime.Manager
             if (mainFill != null) mainFill.rectTransform.anchoredPosition = barBasePos + offset;
             if (trailFill != null) trailFill.rectTransform.anchoredPosition = barBasePos + offset;
             if (bgRect != null) bgRect.anchoredPosition = barBasePos + offset;
-            if (portrait != null) portrait.rectTransform.anchoredPosition = portraitBasePos + offset * 1.15f;
+            if (portrait != null) portrait.rectTransform.anchoredPosition = portraitBasePos + offset;
         }
 
         private void EnsureHUDStyling()
@@ -285,36 +285,50 @@ namespace GameProject.Runtime.Manager
             if (hudStyled) return;
             hudStyled = true;
 
-            p1TrailBarFill = SetupHealthBarHierarchy(p1HealthBarFill, out p1BgRect, out p1BarBasePos);
-            p2TrailBarFill = SetupHealthBarHierarchy(p2HealthBarFill, out p2BgRect, out p2BarBasePos);
+            Vector2 p1BarPos = new Vector2(-410f, 472f);
+            Vector2 p2BarPos = new Vector2(410f, 472f);
+            Vector2 barSize = new Vector2(520f, 20f);
 
-            if (p1PortraitImage != null) p1PortraitBasePos = p1PortraitImage.rectTransform.anchoredPosition;
-            if (p2PortraitImage != null) p2PortraitBasePos = p2PortraitImage.rectTransform.anchoredPosition;
+            p1TrailBarFill = SetupHealthBarHierarchy(p1HealthBarFill, p1BarPos, barSize, out p1BgRect, out p1BarBasePos);
+            p2TrailBarFill = SetupHealthBarHierarchy(p2HealthBarFill, p2BarPos, barSize, out p2BgRect, out p2BarBasePos);
 
-            StylePortrait(p1PortraitImage, new Color(0.22f, 0.72f, 1f, 0.92f));
-            StylePortrait(p2PortraitImage, new Color(1f, 0.28f, 0.34f, 0.92f));
+            StylePortrait(p1PortraitImage, isLeft: true, new Color(0.86f, 0.80f, 0.67f, 0.35f), out p1PortraitBasePos);
+            StylePortrait(p2PortraitImage, isLeft: false, new Color(0.86f, 0.80f, 0.67f, 0.35f), out p2PortraitBasePos);
 
-            StyleNameText(p1NameText, TextAlignmentOptions.Left, new Color(0.92f, 0.97f, 1f, 1f));
-            StyleNameText(p2NameText, TextAlignmentOptions.Right, new Color(1f, 0.92f, 0.92f, 1f));
+            StyleNameText(p1NameText, new Vector2(-490f, 444f), new Vector2(360f, 26f), TextAlignmentOptions.Left);
+            StyleNameText(p2NameText, new Vector2(490f, 444f), new Vector2(360f, 26f), TextAlignmentOptions.Right);
         }
 
-        private Image SetupHealthBarHierarchy(Image mainFill, out RectTransform bgRect, out Vector2 basePos)
+        private Image SetupHealthBarHierarchy(Image mainFill, Vector2 anchoredPos, Vector2 size, out RectTransform bgRect, out Vector2 basePos)
         {
             bgRect = null;
-            basePos = Vector2.zero;
+            basePos = anchoredPos;
             if (mainFill == null) return null;
 
             RectTransform mainRect = mainFill.rectTransform;
+            mainRect.anchorMin = new Vector2(0.5f, 0.5f);
+            mainRect.anchorMax = new Vector2(0.5f, 0.5f);
+            mainRect.pivot = new Vector2(0.5f, 0.5f);
+            mainRect.anchoredPosition = anchoredPos;
+            mainRect.sizeDelta = size;
             basePos = mainRect.anchoredPosition;
 
             Transform parent = mainFill.transform.parent;
             if (parent != null)
             {
-                // P1HealthBarBG veya P2HealthBarBG kardeş objesini bul
                 Transform bgTransform = parent.Find(mainFill.name + "BG");
                 if (bgTransform != null)
                 {
                     bgRect = bgTransform as RectTransform;
+                    if (bgRect != null)
+                    {
+                        bgRect.anchorMin = new Vector2(0.5f, 0.5f);
+                        bgRect.anchorMax = new Vector2(0.5f, 0.5f);
+                        bgRect.pivot = new Vector2(0.5f, 0.5f);
+                        bgRect.anchoredPosition = anchoredPos;
+                        bgRect.sizeDelta = size;
+                    }
+
                     if (bgTransform.TryGetComponent(out Image bgImage))
                     {
                         bgImage.color = barBackgroundColor;
@@ -324,15 +338,15 @@ namespace GameProject.Runtime.Manager
                     {
                         outline = bgTransform.gameObject.AddComponent<Outline>();
                     }
-                    outline.effectColor = new Color(0.92f, 0.75f, 0.26f, 0.9f);
-                    outline.effectDistance = new Vector2(2.5f, -2.5f);
+                    outline.effectColor = new Color(0.72f, 0.62f, 0.38f, 0.55f);
+                    outline.effectDistance = new Vector2(1.5f, -1.5f);
 
                     if (!bgTransform.TryGetComponent(out Shadow shadow))
                     {
                         shadow = bgTransform.gameObject.AddComponent<Shadow>();
                     }
-                    shadow.effectColor = new Color(0f, 0f, 0f, 0.8f);
-                    shadow.effectDistance = new Vector2(4f, -4f);
+                    shadow.effectColor = new Color(0f, 0f, 0f, 0.72f);
+                    shadow.effectDistance = new Vector2(2.5f, -2.5f);
                 }
             }
 
@@ -361,47 +375,65 @@ namespace GameProject.Runtime.Manager
             return trailImage;
         }
 
-        private void StylePortrait(Image portrait, Color accentColor)
+        private void StylePortrait(Image portrait, bool isLeft, Color borderColor, out Vector2 basePos)
         {
+            basePos = Vector2.zero;
             if (portrait == null) return;
+
+            RectTransform rt = portrait.rectTransform;
+            float anchorX = isLeft ? 0f : 1f;
+            rt.anchorMin = new Vector2(anchorX, 1f);
+            rt.anchorMax = new Vector2(anchorX, 1f);
+            rt.pivot = new Vector2(anchorX, 1f);
+            rt.anchoredPosition = new Vector2(isLeft ? 36f : -36f, -28f);
+            rt.sizeDelta = new Vector2(84f, 84f);
+            basePos = rt.anchoredPosition;
 
             if (!portrait.TryGetComponent(out Outline outline))
             {
                 outline = portrait.gameObject.AddComponent<Outline>();
             }
-            outline.effectColor = accentColor;
-            outline.effectDistance = new Vector2(3f, -3f);
+            outline.effectColor = borderColor;
+            outline.effectDistance = new Vector2(1.5f, -1.5f);
 
             if (!portrait.TryGetComponent(out Shadow shadow))
             {
                 shadow = portrait.gameObject.AddComponent<Shadow>();
             }
-            shadow.effectColor = new Color(0f, 0f, 0f, 0.85f);
-            shadow.effectDistance = new Vector2(4.5f, -4.5f);
+            shadow.effectColor = new Color(0f, 0f, 0f, 0.72f);
+            shadow.effectDistance = new Vector2(2.5f, -2.5f);
         }
 
-        private void StyleNameText(TextMeshProUGUI textComp, TextAlignmentOptions alignment, Color tint)
+        private void StyleNameText(TextMeshProUGUI textComp, Vector2 anchoredPos, Vector2 size, TextAlignmentOptions alignment)
         {
             if (textComp == null) return;
-            textComp.color = tint;
+
+            RectTransform rt = textComp.rectTransform;
+            rt.anchorMin = new Vector2(0.5f, 0.5f);
+            rt.anchorMax = new Vector2(0.5f, 0.5f);
+            rt.pivot = new Vector2(0.5f, 0.5f);
+            rt.anchoredPosition = anchoredPos;
+            rt.sizeDelta = size;
+
+            textComp.enableAutoSizing = false;
+            textComp.fontSize = 22f;
+            textComp.color = new Color(0.93f, 0.94f, 0.96f, 1f);
             textComp.fontStyle = FontStyles.Bold;
             textComp.alignment = alignment;
             textComp.enableWordWrapping = false;
             textComp.overflowMode = TextOverflowModes.Overflow;
 
-            if (!textComp.TryGetComponent(out Outline outline))
+            if (textComp.TryGetComponent(out Outline outline))
             {
-                outline = textComp.gameObject.AddComponent<Outline>();
+                outline.enabled = false;
             }
-            outline.effectColor = new Color(0f, 0f, 0f, 0.95f);
-            outline.effectDistance = new Vector2(1.8f, -1.8f);
 
             if (!textComp.TryGetComponent(out Shadow shadow))
             {
                 shadow = textComp.gameObject.AddComponent<Shadow>();
             }
-            shadow.effectColor = new Color(0f, 0f, 0f, 0.9f);
-            shadow.effectDistance = new Vector2(3f, -3f);
+            shadow.effectColor = new Color(0f, 0f, 0f, 0.85f);
+            shadow.effectDistance = new Vector2(1.8f, -1.8f);
         }
 
         public void UnbindFighters()

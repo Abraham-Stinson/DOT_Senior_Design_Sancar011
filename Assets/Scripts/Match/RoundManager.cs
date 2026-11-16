@@ -17,8 +17,8 @@ namespace GameProject.Runtime.Manager
         [Header("UI - Round Indicators (Yuvarlaklar)")]
         [SerializeField] private Image[] p1RoundIcons;
         [SerializeField] private Image[] p2RoundIcons;
-        [SerializeField] private Color roundWonColor = new Color(1f, 0.82f, 0.18f, 1f);
-        [SerializeField] private Color roundEmptyColor = new Color(0.14f, 0.16f, 0.22f, 0.85f);
+        [SerializeField] private Color roundWonColor = new Color(0.92f, 0.74f, 0.24f, 1f);
+        [SerializeField] private Color roundEmptyColor = new Color(0.18f, 0.19f, 0.22f, 0.75f);
 
         [Header("UI - Center Announcements")]
         [SerializeField] private TextMeshProUGUI centerAnnouncementText;
@@ -119,17 +119,19 @@ namespace GameProject.Runtime.Manager
             if (centerAnnouncementText != null)
             {
                 centerAnnouncementText.gameObject.SetActive(true);
+                Color warmIvory = new Color(0.96f, 0.88f, 0.68f, 1f);
+                Color fightCrimson = new Color(0.90f, 0.22f, 0.22f, 1f);
 
-                ShowAnimatedAnnouncement("3", new Color(1f, 0.88f, 0.35f, 1f), 1f, 1.65f);
+                ShowAnimatedAnnouncement("3", warmIvory, 1f, 1.25f);
                 yield return new WaitForSeconds(1f);
 
-                ShowAnimatedAnnouncement("2", new Color(1f, 0.68f, 0.22f, 1f), 1f, 1.75f);
+                ShowAnimatedAnnouncement("2", warmIvory, 1f, 1.25f);
                 yield return new WaitForSeconds(1f);
 
-                ShowAnimatedAnnouncement("1", new Color(1f, 0.42f, 0.22f, 1f), 1f, 1.85f);
+                ShowAnimatedAnnouncement("1", warmIvory, 1f, 1.25f);
                 yield return new WaitForSeconds(1f);
 
-                ShowAnimatedAnnouncement("FIGHT!", new Color(1f, 0.22f, 0.25f, 1f), 1f, 2.2f);
+                ShowAnimatedAnnouncement("FIGHT!", fightCrimson, 1f, 1.32f);
                 yield return new WaitForSeconds(1f);
 
                 centerAnnouncementText.gameObject.SetActive(false);
@@ -168,15 +170,15 @@ namespace GameProject.Runtime.Manager
 
             if (seconds <= 10)
             {
-                timerText.color = new Color(1f, 0.25f, 0.28f, 1f);
+                timerText.color = new Color(0.92f, 0.24f, 0.24f, 1f);
                 if (pulse && gameObject.activeInHierarchy)
                 {
-                    StartCoroutine(PulseRectTransform(timerText.rectTransform, 1.28f, 0.22f));
+                    StartCoroutine(PulseRectTransform(timerText.rectTransform, 1.12f, 0.20f));
                 }
             }
             else
             {
-                timerText.color = new Color(1f, 0.88f, 0.42f, 1f);
+                timerText.color = new Color(0.95f, 0.90f, 0.76f, 1f);
                 timerText.rectTransform.localScale = Vector3.one;
             }
         }
@@ -232,20 +234,18 @@ namespace GameProject.Runtime.Manager
 
         private IEnumerator RoundEndSequence(FighterController winner)
         {
-            string announcement = "DRAW!";
-            Color announceColor = new Color(0.9f, 0.9f, 0.95f, 1f);
+            string announcement = "DRAW";
+            Color announceColor = new Color(0.96f, 0.88f, 0.68f, 1f);
 
             if (winner == player1)
             {
                 p1RoundsWon++;
-                announcement = $"{player1.Data.displayName.ToUpperInvariant()}\n<size=68%><color=#FFD147>WINS THE ROUND!</color></size>";
-                announceColor = new Color(0.35f, 0.82f, 1f, 1f);
+                announcement = $"{player1.Data.displayName.ToUpperInvariant()} WINS";
             }
             else if (winner == player2)
             {
                 p2RoundsWon++;
-                announcement = $"{player2.Data.displayName.ToUpperInvariant()}\n<size=68%><color=#FFD147>WINS THE ROUND!</color></size>";
-                announceColor = new Color(1f, 0.38f, 0.42f, 1f);
+                announcement = $"{player2.Data.displayName.ToUpperInvariant()} WINS";
             }
 
             UpdateRoundIcons(animateNewest: true);
@@ -253,7 +253,7 @@ namespace GameProject.Runtime.Manager
             if (centerAnnouncementText != null)
             {
                 centerAnnouncementText.gameObject.SetActive(true);
-                ShowAnimatedAnnouncement(announcement, announceColor, 3f, 1.55f);
+                ShowAnimatedAnnouncement(announcement, announceColor, 3f, 1.25f);
             }
 
             yield return new WaitForSeconds(3f);
@@ -266,15 +266,18 @@ namespace GameProject.Runtime.Manager
 
         private void UpdateRoundIcons(bool animateNewest = false)
         {
+            Color wonColor = new Color(0.92f, 0.74f, 0.24f, 1f);
+            Color emptyColor = new Color(0.18f, 0.19f, 0.22f, 0.75f);
+
             for (int i = 0; i < p1RoundIcons.Length; i++)
             {
                 if (p1RoundIcons[i] == null) continue;
                 bool won = i < p1RoundsWon;
-                p1RoundIcons[i].color = won ? roundWonColor : roundEmptyColor;
+                p1RoundIcons[i].color = won ? wonColor : emptyColor;
 
                 if (animateNewest && won && i == p1RoundsWon - 1 && gameObject.activeInHierarchy)
                 {
-                    StartCoroutine(PulseRectTransform(p1RoundIcons[i].rectTransform, 1.45f, 0.32f));
+                    StartCoroutine(PulseRectTransform(p1RoundIcons[i].rectTransform, 1.25f, 0.26f));
                 }
             }
 
@@ -282,11 +285,11 @@ namespace GameProject.Runtime.Manager
             {
                 if (p2RoundIcons[i] == null) continue;
                 bool won = i < p2RoundsWon;
-                p2RoundIcons[i].color = won ? roundWonColor : roundEmptyColor;
+                p2RoundIcons[i].color = won ? wonColor : emptyColor;
 
                 if (animateNewest && won && i == p2RoundsWon - 1 && gameObject.activeInHierarchy)
                 {
-                    StartCoroutine(PulseRectTransform(p2RoundIcons[i].rectTransform, 1.45f, 0.32f));
+                    StartCoroutine(PulseRectTransform(p2RoundIcons[i].rectTransform, 1.25f, 0.26f));
                 }
             }
         }
@@ -311,17 +314,10 @@ namespace GameProject.Runtime.Manager
         {
             if (matchWinnerNameText != null && matchWinner != null)
             {
-                bool isP1 = (matchWinner == player1);
-                string playerSide = isP1 ? "PLAYER 1" : "PLAYER 2";
-                string sideColorHex = isP1 ? "#45B6FE" : "#FF4757";
                 string charName = matchWinner.Data != null ? matchWinner.Data.displayName.ToUpperInvariant() : "CHAMPION";
-
                 matchWinnerNameText.richText = true;
-                matchWinnerNameText.color = Color.white;
-                matchWinnerNameText.text =
-                    $"<size=62%><color={sideColorHex}>{playerSide}</color></size>\n" +
-                    $"<size=115%><color=#FFD86B>{charName}</color></size>\n" +
-                    $"<size=72%><color=#FFFFFF>WINS THE MATCH!</color></size>";
+                matchWinnerNameText.color = new Color(0.95f, 0.88f, 0.70f, 1f);
+                matchWinnerNameText.text = $"{charName}\n<size=65%>WINS THE MATCH</size>";
             }
 
             GameManager.instance.SetGameState(EGameState.PVPM_MATCHOVER);
@@ -331,7 +327,7 @@ namespace GameProject.Runtime.Manager
         {
             if (centerAnnouncementText == null) return;
 
-            centerAnnouncementText.richText = true;
+            centerAnnouncementText.richText = false;
             centerAnnouncementText.text = text;
             centerAnnouncementText.color = baseColor;
 
@@ -346,8 +342,8 @@ namespace GameProject.Runtime.Manager
         {
             RectTransform rt = label.rectTransform;
             float elapsed = 0f;
-            float popDuration = Mathf.Min(0.22f, duration * 0.35f);
-            float fadeStart = Mathf.Max(popDuration, duration - 0.22f);
+            float popDuration = Mathf.Min(0.18f, duration * 0.30f);
+            float fadeStart = Mathf.Max(popDuration, duration - 0.18f);
 
             while (elapsed < duration)
             {
@@ -359,13 +355,12 @@ namespace GameProject.Runtime.Manager
                     float eased = 1f - Mathf.Pow(1f - t, 3f);
                     float scale = Mathf.Lerp(startScale, 1f, eased);
                     rt.localScale = new Vector3(scale, scale, 1f);
-                    label.color = new Color(baseColor.r, baseColor.g, baseColor.b, Mathf.Clamp01(t * 2f));
+                    label.color = new Color(baseColor.r, baseColor.g, baseColor.b, Mathf.Clamp01(t * 2.5f));
                 }
                 else if (elapsed >= fadeStart)
                 {
                     float t = Mathf.InverseLerp(fadeStart, duration, elapsed);
-                    float scale = Mathf.Lerp(1f, 1.08f, t);
-                    rt.localScale = new Vector3(scale, scale, 1f);
+                    rt.localScale = Vector3.one;
                     label.color = new Color(baseColor.r, baseColor.g, baseColor.b, 1f - t);
                 }
                 else
@@ -404,95 +399,94 @@ namespace GameProject.Runtime.Manager
 
             if (timerText != null)
             {
-                timerText.color = new Color(1f, 0.88f, 0.42f, 1f);
+                RectTransform tr = timerText.rectTransform;
+                tr.anchorMin = new Vector2(0.5f, 0.5f);
+                tr.anchorMax = new Vector2(0.5f, 0.5f);
+                tr.pivot = new Vector2(0.5f, 0.5f);
+                tr.anchoredPosition = new Vector2(0f, 466f);
+                tr.sizeDelta = new Vector2(96f, 48f);
+
+                timerText.enableAutoSizing = false;
+                timerText.fontSize = 42f;
+                timerText.color = new Color(0.95f, 0.90f, 0.76f, 1f);
                 timerText.fontStyle = FontStyles.Bold;
                 timerText.alignment = TextAlignmentOptions.Center;
 
-                // Timer arkasına şık koyu rozet plaka oluştur
-                Transform timerParent = timerText.transform.parent;
-                if (timerParent != null && timerText.transform.Find("TimerBackdrop") == null)
-                {
-                    GameObject badge = new GameObject("TimerBackdrop", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Outline), typeof(Shadow));
-                    badge.transform.SetParent(timerParent, false);
-                    badge.transform.SetSiblingIndex(timerText.transform.GetSiblingIndex());
-
-                    RectTransform tr = timerText.rectTransform;
-                    RectTransform br = badge.GetComponent<RectTransform>();
-                    br.anchorMin = tr.anchorMin;
-                    br.anchorMax = tr.anchorMax;
-                    br.pivot = tr.pivot;
-                    br.anchoredPosition = tr.anchoredPosition;
-                    br.sizeDelta = new Vector2(Mathf.Max(tr.sizeDelta.x, 96f), Mathf.Max(tr.sizeDelta.y + 16f, 68f));
-
-                    Image badgeImg = badge.GetComponent<Image>();
-                    badgeImg.color = new Color(0.06f, 0.07f, 0.11f, 0.92f);
-                    badgeImg.raycastTarget = false;
-
-                    Outline badgeOutline = badge.GetComponent<Outline>();
-                    badgeOutline.effectColor = new Color(0.92f, 0.74f, 0.25f, 0.85f);
-                    badgeOutline.effectDistance = new Vector2(2f, -2f);
-
-                    Shadow badgeShadow = badge.GetComponent<Shadow>();
-                    badgeShadow.effectColor = new Color(0f, 0f, 0f, 0.75f);
-                    badgeShadow.effectDistance = new Vector2(3f, -3f);
-                }
-
-                AddTextShadowAndOutline(timerText.gameObject, new Color(0f, 0f, 0f, 0.95f), 2.5f);
+                AddTextShadow(timerText.gameObject, new Color(0f, 0f, 0f, 0.9f), 2f);
             }
 
             if (centerAnnouncementText != null)
             {
-                centerAnnouncementText.color = new Color(1f, 0.85f, 0.25f, 1f);
+                RectTransform cr = centerAnnouncementText.rectTransform;
+                cr.anchorMin = new Vector2(0.5f, 0.5f);
+                cr.anchorMax = new Vector2(0.5f, 0.5f);
+                cr.pivot = new Vector2(0.5f, 0.5f);
+                cr.anchoredPosition = new Vector2(0f, 50f);
+                cr.sizeDelta = new Vector2(900f, 140f);
+
+                centerAnnouncementText.enableAutoSizing = false;
+                centerAnnouncementText.fontSize = 76f;
+                centerAnnouncementText.color = new Color(0.96f, 0.88f, 0.68f, 1f);
                 centerAnnouncementText.fontStyle = FontStyles.Bold;
                 centerAnnouncementText.alignment = TextAlignmentOptions.Center;
                 centerAnnouncementText.enableWordWrapping = false;
                 centerAnnouncementText.overflowMode = TextOverflowModes.Overflow;
-                AddTextShadowAndOutline(centerAnnouncementText.gameObject, new Color(0f, 0f, 0f, 0.95f), 3.5f);
+                AddTextShadow(centerAnnouncementText.gameObject, new Color(0f, 0f, 0f, 0.92f), 3f);
             }
 
             if (matchWinnerNameText != null)
             {
-                matchWinnerNameText.color = Color.white;
+                matchWinnerNameText.enableAutoSizing = false;
+                matchWinnerNameText.fontSize = 48f;
+                matchWinnerNameText.color = new Color(0.95f, 0.88f, 0.70f, 1f);
                 matchWinnerNameText.fontStyle = FontStyles.Bold;
                 matchWinnerNameText.alignment = TextAlignmentOptions.Center;
-                AddTextShadowAndOutline(matchWinnerNameText.gameObject, new Color(0f, 0f, 0f, 0.95f), 3f);
+                AddTextShadow(matchWinnerNameText.gameObject, new Color(0f, 0f, 0f, 0.92f), 2.5f);
             }
 
-            StyleRoundIcons(p1RoundIcons);
-            StyleRoundIcons(p2RoundIcons);
+            StyleRoundIcons(p1RoundIcons, isLeftSide: true);
+            StyleRoundIcons(p2RoundIcons, isLeftSide: false);
         }
 
-        private void StyleRoundIcons(Image[] icons)
+        private void StyleRoundIcons(Image[] icons, bool isLeftSide)
         {
             if (icons == null) return;
             for (int i = 0; i < icons.Length; i++)
             {
                 if (icons[i] == null) continue;
+
+                RectTransform rt = icons[i].rectTransform;
+                rt.anchorMin = new Vector2(0.5f, 0.5f);
+                rt.anchorMax = new Vector2(0.5f, 0.5f);
+                rt.pivot = new Vector2(0.5f, 0.5f);
+                float x = isLeftSide ? (-188f + i * 22f) : (188f - i * 22f);
+                rt.anchoredPosition = new Vector2(x, 444f);
+                rt.sizeDelta = new Vector2(14f, 14f);
+
                 if (!icons[i].TryGetComponent(out Outline outline))
                 {
                     outline = icons[i].gameObject.AddComponent<Outline>();
                 }
-                outline.effectColor = new Color(0.95f, 0.78f, 0.28f, 0.9f);
-                outline.effectDistance = new Vector2(1.5f, -1.5f);
+                outline.effectColor = new Color(0.85f, 0.70f, 0.30f, 0.55f);
+                outline.effectDistance = new Vector2(1f, -1f);
 
                 if (!icons[i].TryGetComponent(out Shadow shadow))
                 {
                     shadow = icons[i].gameObject.AddComponent<Shadow>();
                 }
-                shadow.effectColor = new Color(0f, 0f, 0f, 0.85f);
-                shadow.effectDistance = new Vector2(2.5f, -2.5f);
+                shadow.effectColor = new Color(0f, 0f, 0f, 0.8f);
+                shadow.effectDistance = new Vector2(1.5f, -1.5f);
             }
         }
 
-        private void AddTextShadowAndOutline(GameObject target, Color color, float dist)
+        private void AddTextShadow(GameObject target, Color color, float dist)
         {
             if (target == null) return;
-            if (!target.TryGetComponent(out Outline outline))
+
+            if (target.TryGetComponent(out Outline outline))
             {
-                outline = target.AddComponent<Outline>();
+                outline.enabled = false;
             }
-            outline.effectColor = color;
-            outline.effectDistance = new Vector2(dist * 0.65f, -dist * 0.65f);
 
             if (!target.TryGetComponent(out Shadow shadow))
             {

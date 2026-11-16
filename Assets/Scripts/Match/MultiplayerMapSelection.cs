@@ -18,9 +18,9 @@ namespace GameProject.Runtime.Manager
         [Header("Selection Visuals (Border Colors)")]
         [SerializeField] private Color unselectedColor = new Color(0.68f, 0.70f, 0.76f, 1f);
         [SerializeField] private Color highlightedColor = Color.white;
-        [SerializeField] private Color p1SelectedColor = new Color(0.15f, 0.68f, 1f, 1f);
-        [SerializeField] private Color p2SelectedColor = new Color(1f, 0.22f, 0.30f, 1f);
-        [SerializeField] private Color lockedColor = new Color(1f, 0.88f, 0.32f, 1f);
+        [SerializeField] private Color p1SelectedColor = new Color(0.20f, 0.56f, 0.92f, 1f);
+        [SerializeField] private Color p2SelectedColor = new Color(0.86f, 0.22f, 0.24f, 1f);
+        [SerializeField] private Color lockedColor = new Color(0.95f, 0.86f, 0.55f, 1f);
 
         [Header("Preview Layout")]
         [Tooltip("True ise P1 karakter önizlemesi sağda, P2 solda gösterilir. False ise MK standardı (P1 Solda, P2 Sağda) kullanılır.")]
@@ -44,21 +44,15 @@ namespace GameProject.Runtime.Manager
             public Image leftBorder;
             public Image rightBorder;
             public GameObject p1BadgeObj;
-            public TextMeshProUGUI p1BadgeText;
             public Image p1BadgeBg;
             public GameObject p2BadgeObj;
-            public TextMeshProUGUI p2BadgeText;
             public Image p2BadgeBg;
-            public TextMeshProUGUI mapTitleLabel;
         }
 
         private class CharacterPreviewRig
         {
             public RectTransform rootRect;
             public Image fullBodyImage;
-            public Image portraitBadgeImage;
-            public Image portraitFrameImage;
-            public Image pedestalGlowImage;
             public SpriteRenderer hiddenSpriteRenderer;
             public Animator hiddenAnimator;
             public Vector2 baseAnchoredPos;
@@ -129,7 +123,7 @@ namespace GameProject.Runtime.Manager
             Transform screenRoot = mapPanelParent.parent;
             if (screenRoot != null && screenRoot.TryGetComponent(out Image screenBg))
             {
-                screenBg.color = new Color(0.05f, 0.06f, 0.10f, 0.96f);
+                screenBg.color = new Color(0.05f, 0.05f, 0.07f, 0.96f);
             }
 
             // Ortadaki Harita Havuzu
@@ -140,7 +134,7 @@ namespace GameProject.Runtime.Manager
                 poolRect.anchorMax = new Vector2(0.5f, 0.5f);
                 poolRect.pivot = new Vector2(0.5f, 0.5f);
                 poolRect.anchoredPosition = new Vector2(0f, -10f);
-                poolRect.sizeDelta = new Vector2(560f, 520f);
+                poolRect.sizeDelta = new Vector2(520f, 400f);
             }
 
             if (mapPanelParent.TryGetComponent(out Mask mask))
@@ -150,22 +144,22 @@ namespace GameProject.Runtime.Manager
 
             if (mapPanelParent.TryGetComponent(out Image panelImg))
             {
-                panelImg.color = new Color(0.08f, 0.10f, 0.16f, 0.92f);
+                panelImg.color = new Color(0.07f, 0.07f, 0.09f, 0.78f);
             }
 
             if (!mapPanelParent.TryGetComponent(out Outline outline))
             {
                 outline = mapPanelParent.gameObject.AddComponent<Outline>();
             }
-            outline.effectColor = new Color(0.95f, 0.78f, 0.28f, 0.65f);
-            outline.effectDistance = new Vector2(2.5f, -2.5f);
+            outline.effectColor = new Color(1f, 1f, 1f, 0.14f);
+            outline.effectDistance = new Vector2(1f, -1f);
 
             if (mapPanelParent.TryGetComponent(out GridLayoutGroup grid))
             {
                 grid.childAlignment = TextAnchor.MiddleCenter;
-                grid.cellSize = new Vector2(165f, 165f);
-                grid.spacing = new Vector2(24f, 24f);
-                grid.padding = new RectOffset(20, 20, 20, 20);
+                grid.cellSize = new Vector2(145f, 145f);
+                grid.spacing = new Vector2(16f, 16f);
+                grid.padding = new RectOffset(16, 16, 16, 16);
                 grid.constraint = GridLayoutGroup.Constraint.Flexible;
             }
 
@@ -180,15 +174,17 @@ namespace GameProject.Runtime.Manager
 
                     if (t.name.Contains("CharacterSelection") || t.text.Contains("Arena") || t.text.Contains("ARENA"))
                     {
-                        t.text = "SELECT BATTLE ARENA";
-                        t.color = new Color(1f, 0.85f, 0.28f, 1f);
+                        t.text = "SELECT ARENA";
+                        t.enableAutoSizing = false;
+                        t.fontSize = 38f;
                         t.fontStyle = FontStyles.Bold;
-                        t.rectTransform.anchoredPosition = new Vector2(0f, 445f);
-                        StyleLabel(t, new Color(1f, 0.85f, 0.28f, 1f));
+                        t.rectTransform.anchoredPosition = new Vector2(0f, 450f);
+                        t.rectTransform.sizeDelta = new Vector2(600f, 60f);
+                        StyleLabel(t, new Color(0.92f, 0.88f, 0.78f, 1f));
                     }
                 }
 
-                // Havuzun hemen üstünde Mortal Kombat tarzı seçili Arena Başlığı ("SEA OF BLOOD" gibi)
+                // Seçili Arena Banner
                 Transform existingBanner = screenRoot.Find("CenterArenaBanner");
                 if (existingBanner != null) Destroy(existingBanner.gameObject);
 
@@ -198,16 +194,16 @@ namespace GameProject.Runtime.Manager
                 bannerRect.anchorMin = new Vector2(0.5f, 0.5f);
                 bannerRect.anchorMax = new Vector2(0.5f, 0.5f);
                 bannerRect.pivot = new Vector2(0.5f, 0.5f);
-                bannerRect.anchoredPosition = new Vector2(0f, 315f);
-                bannerRect.sizeDelta = new Vector2(560f, 54f);
+                bannerRect.anchoredPosition = new Vector2(0f, 240f);
+                bannerRect.sizeDelta = new Vector2(520f, 40f);
 
                 Image bannerBg = bannerObj.GetComponent<Image>();
-                bannerBg.color = new Color(0.08f, 0.11f, 0.18f, 0.94f);
+                bannerBg.color = new Color(0.09f, 0.10f, 0.13f, 0.85f);
                 bannerBg.raycastTarget = false;
 
                 Outline bannerOutline = bannerObj.GetComponent<Outline>();
-                bannerOutline.effectColor = new Color(0.95f, 0.78f, 0.28f, 0.8f);
-                bannerOutline.effectDistance = new Vector2(2f, -2f);
+                bannerOutline.effectColor = new Color(1f, 1f, 1f, 0.14f);
+                bannerOutline.effectDistance = new Vector2(1f, -1f);
 
                 GameObject bannerTxtObj = new GameObject("BannerText", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
                 bannerTxtObj.transform.SetParent(bannerRect, false);
@@ -219,44 +215,60 @@ namespace GameProject.Runtime.Manager
 
                 centerArenaBannerText = bannerTxtObj.GetComponent<TextMeshProUGUI>();
                 if (p1MapNameText != null) centerArenaBannerText.font = p1MapNameText.font;
-                centerArenaBannerText.fontSize = 28f;
+                centerArenaBannerText.enableAutoSizing = false;
+                centerArenaBannerText.fontSize = 22f;
                 centerArenaBannerText.alignment = TextAlignmentOptions.Center;
                 centerArenaBannerText.raycastTarget = false;
-                StyleLabel(centerArenaBannerText, new Color(1f, 0.88f, 0.42f, 1f));
+                StyleLabel(centerArenaBannerText, new Color(0.92f, 0.92f, 0.95f, 1f));
 
-                // Sağ ve Sol Seçilen Karakter Önizlemeleri (2. resimdeki gibi birbirine bakan karakterler)
+                // Sağ ve Sol Seçilen Karakter Önizlemeleri
                 float p1X = p1PreviewOnRightSide ? 610f : -610f;
                 float p2X = p1PreviewOnRightSide ? -610f : 610f;
                 float p1Facing = p1PreviewOnRightSide ? -1f : 1f;
                 float p2Facing = p1PreviewOnRightSide ? 1f : -1f;
 
-                p1FighterPreviewRig = CreateCharacterPreviewRig(screenRoot, "P1_LockedFighterPreview", new Vector2(p1X, 45f), p1Facing, p1SelectedColor);
-                p2FighterPreviewRig = CreateCharacterPreviewRig(screenRoot, "P2_LockedFighterPreview", new Vector2(p2X, 45f), p2Facing, p2SelectedColor);
+                p1FighterPreviewRig = CreateCharacterPreviewRig(screenRoot, "P1_LockedFighterPreview", new Vector2(p1X, 45f), p1Facing);
+                p2FighterPreviewRig = CreateCharacterPreviewRig(screenRoot, "P2_LockedFighterPreview", new Vector2(p2X, 45f), p2Facing);
+
+                Color offWhite = new Color(0.94f, 0.95f, 0.97f, 1f);
+                Color hintGray = new Color(0.62f, 0.65f, 0.70f, 0.9f);
 
                 if (p1MapNameText != null)
                 {
-                    p1MapNameText.rectTransform.anchoredPosition = new Vector2(p1X, -365f);
-                    StyleLabel(p1MapNameText, p1SelectedColor);
+                    p1MapNameText.rectTransform.anchoredPosition = new Vector2(p1X, -320f);
+                    p1MapNameText.rectTransform.sizeDelta = new Vector2(460f, 44f);
+                    p1MapNameText.enableAutoSizing = false;
+                    p1MapNameText.fontSize = 28f;
+                    StyleLabel(p1MapNameText, offWhite);
                 }
                 if (p1ReadyText != null)
                 {
-                    p1ReadyText.rectTransform.anchoredPosition = new Vector2(p1X, -455f);
-                    StyleLabel(p1ReadyText, Color.white);
+                    p1ReadyText.rectTransform.anchoredPosition = new Vector2(p1X, -362f);
+                    p1ReadyText.rectTransform.sizeDelta = new Vector2(460f, 32f);
+                    p1ReadyText.enableAutoSizing = false;
+                    p1ReadyText.fontSize = 18f;
+                    StyleLabel(p1ReadyText, hintGray);
                 }
                 if (p2MapNameText != null)
                 {
-                    p2MapNameText.rectTransform.anchoredPosition = new Vector2(p2X, -365f);
-                    StyleLabel(p2MapNameText, p2SelectedColor);
+                    p2MapNameText.rectTransform.anchoredPosition = new Vector2(p2X, -320f);
+                    p2MapNameText.rectTransform.sizeDelta = new Vector2(460f, 44f);
+                    p2MapNameText.enableAutoSizing = false;
+                    p2MapNameText.fontSize = 28f;
+                    StyleLabel(p2MapNameText, offWhite);
                 }
                 if (p2ReadyText != null)
                 {
-                    p2ReadyText.rectTransform.anchoredPosition = new Vector2(p2X, -455f);
-                    StyleLabel(p2ReadyText, Color.white);
+                    p2ReadyText.rectTransform.anchoredPosition = new Vector2(p2X, -362f);
+                    p2ReadyText.rectTransform.sizeDelta = new Vector2(460f, 32f);
+                    p2ReadyText.enableAutoSizing = false;
+                    p2ReadyText.fontSize = 18f;
+                    StyleLabel(p2ReadyText, hintGray);
                 }
             }
         }
 
-        private CharacterPreviewRig CreateCharacterPreviewRig(Transform parent, string name, Vector2 anchoredPos, float facingSign, Color accentColor)
+        private CharacterPreviewRig CreateCharacterPreviewRig(Transform parent, string name, Vector2 anchoredPos, float facingSign)
         {
             Transform existing = parent.Find(name);
             if (existing != null) Destroy(existing.gameObject);
@@ -270,19 +282,7 @@ namespace GameProject.Runtime.Manager
             rootRect.anchorMax = new Vector2(0.5f, 0.5f);
             rootRect.pivot = new Vector2(0.5f, 0.5f);
             rootRect.anchoredPosition = anchoredPos;
-            rootRect.sizeDelta = new Vector2(520f, 680f);
-
-            GameObject glowObj = new GameObject("PedestalGlow", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
-            glowObj.transform.SetParent(rootRect, false);
-            RectTransform glowRect = glowObj.GetComponent<RectTransform>();
-            glowRect.anchorMin = new Vector2(0.5f, 0f);
-            glowRect.anchorMax = new Vector2(0.5f, 0f);
-            glowRect.pivot = new Vector2(0.5f, 0.5f);
-            glowRect.anchoredPosition = new Vector2(0f, 45f);
-            glowRect.sizeDelta = new Vector2(360f, 26f);
-            Image glowImg = glowObj.GetComponent<Image>();
-            glowImg.color = new Color(accentColor.r, accentColor.g, accentColor.b, 0.45f);
-            glowImg.raycastTarget = false;
+            rootRect.sizeDelta = new Vector2(480f, 620f);
 
             GameObject bodyObj = new GameObject("FullBodyFighter", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Shadow));
             bodyObj.transform.SetParent(rootRect, false);
@@ -290,8 +290,8 @@ namespace GameProject.Runtime.Manager
             bodyRect.anchorMin = new Vector2(0.5f, 0.5f);
             bodyRect.anchorMax = new Vector2(0.5f, 0.5f);
             bodyRect.pivot = new Vector2(0.5f, 0.5f);
-            bodyRect.anchoredPosition = new Vector2(0f, 20f);
-            bodyRect.sizeDelta = new Vector2(500f, 620f);
+            bodyRect.anchoredPosition = new Vector2(0f, 10f);
+            bodyRect.sizeDelta = new Vector2(460f, 580f);
             bodyRect.localScale = new Vector3(facingSign, 1f, 1f);
 
             Image bodyImg = bodyObj.GetComponent<Image>();
@@ -299,37 +299,8 @@ namespace GameProject.Runtime.Manager
             bodyImg.raycastTarget = false;
 
             Shadow bodyShadow = bodyObj.GetComponent<Shadow>();
-            bodyShadow.effectColor = new Color(0f, 0f, 0f, 0.75f);
-            bodyShadow.effectDistance = new Vector2(facingSign * -10f, -8f);
-
-            GameObject badgeFrameObj = new GameObject("PortraitMedallionFrame", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Shadow));
-            badgeFrameObj.transform.SetParent(rootRect, false);
-            RectTransform badgeFrameRect = badgeFrameObj.GetComponent<RectTransform>();
-            badgeFrameRect.anchorMin = new Vector2(0.5f, 0f);
-            badgeFrameRect.anchorMax = new Vector2(0.5f, 0f);
-            badgeFrameRect.pivot = new Vector2(0.5f, 0.5f);
-            badgeFrameRect.anchoredPosition = new Vector2(facingSign * 145f, 95f);
-            badgeFrameRect.sizeDelta = new Vector2(116f, 116f);
-
-            Image badgeFrameImg = badgeFrameObj.GetComponent<Image>();
-            badgeFrameImg.color = accentColor;
-            badgeFrameImg.raycastTarget = false;
-
-            Shadow badgeShadow = badgeFrameObj.GetComponent<Shadow>();
-            badgeShadow.effectColor = new Color(0f, 0f, 0f, 0.85f);
-            badgeShadow.effectDistance = new Vector2(4f, -4f);
-
-            GameObject badgePortraitObj = new GameObject("PortraitMedallion", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
-            badgePortraitObj.transform.SetParent(badgeFrameRect, false);
-            RectTransform badgePortraitRect = badgePortraitObj.GetComponent<RectTransform>();
-            badgePortraitRect.anchorMin = Vector2.zero;
-            badgePortraitRect.anchorMax = Vector2.one;
-            badgePortraitRect.offsetMin = new Vector2(5f, 5f);
-            badgePortraitRect.offsetMax = new Vector2(-5f, -5f);
-
-            Image badgePortraitImg = badgePortraitObj.GetComponent<Image>();
-            badgePortraitImg.preserveAspect = false;
-            badgePortraitImg.raycastTarget = false;
+            bodyShadow.effectColor = new Color(0f, 0f, 0f, 0.65f);
+            bodyShadow.effectDistance = new Vector2(facingSign * -8f, -6f);
 
             GameObject animDriverObj = new GameObject("PreviewAnimDriver", typeof(SpriteRenderer), typeof(Animator));
             animDriverObj.transform.SetParent(rootRect, false);
@@ -342,9 +313,6 @@ namespace GameProject.Runtime.Manager
             {
                 rootRect = rootRect,
                 fullBodyImage = bodyImg,
-                portraitBadgeImage = badgePortraitImg,
-                portraitFrameImage = badgeFrameImg,
-                pedestalGlowImage = glowImg,
                 hiddenSpriteRenderer = sr,
                 hiddenAnimator = anim,
                 baseAnchoredPos = anchoredPos,
@@ -355,7 +323,7 @@ namespace GameProject.Runtime.Manager
         private MapSlotBorderVisual BuildMapSlotBorderAndBadges(Image slotImage, string mapName)
         {
             RectTransform rt = slotImage.rectTransform;
-            float borderThickness = 6f;
+            float borderThickness = 4f;
 
             // Alt kısımda harita adını gösteren ince koyu şerit
             GameObject nameBarObj = new GameObject("MapNameStrip", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
@@ -365,9 +333,9 @@ namespace GameProject.Runtime.Manager
             nameBarRect.anchorMax = new Vector2(1f, 0f);
             nameBarRect.pivot = new Vector2(0.5f, 0f);
             nameBarRect.anchoredPosition = new Vector2(0f, borderThickness);
-            nameBarRect.sizeDelta = new Vector2(-borderThickness * 2f, 28f);
+            nameBarRect.sizeDelta = new Vector2(-borderThickness * 2f, 24f);
             Image nameBarImg = nameBarObj.GetComponent<Image>();
-            nameBarImg.color = new Color(0.04f, 0.05f, 0.09f, 0.86f);
+            nameBarImg.color = new Color(0.05f, 0.05f, 0.07f, 0.86f);
             nameBarImg.raycastTarget = false;
 
             GameObject nameTxtObj = new GameObject("Title", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
@@ -380,9 +348,9 @@ namespace GameProject.Runtime.Manager
             TextMeshProUGUI titleTmp = nameTxtObj.GetComponent<TextMeshProUGUI>();
             if (p1MapNameText != null) titleTmp.font = p1MapNameText.font;
             titleTmp.text = mapName.ToUpperInvariant();
-            titleTmp.fontSize = 15f;
+            titleTmp.fontSize = 13f;
             titleTmp.fontStyle = FontStyles.Bold;
-            titleTmp.color = new Color(0.95f, 0.95f, 1f, 1f);
+            titleTmp.color = new Color(0.93f, 0.94f, 0.96f, 1f);
             titleTmp.alignment = TextAlignmentOptions.Center;
             titleTmp.enableWordWrapping = false;
             titleTmp.overflowMode = TextOverflowModes.Ellipsis;
@@ -393,15 +361,15 @@ namespace GameProject.Runtime.Manager
             Image left = CreateBorderEdge(rt, "Border_Left", new Vector2(0f, 0f), new Vector2(0f, 1f), Vector2.zero, new Vector2(borderThickness, 0f));
             Image right = CreateBorderEdge(rt, "Border_Right", new Vector2(1f, 0f), new Vector2(1f, 1f), new Vector2(-borderThickness, 0f), Vector2.zero);
 
-            GameObject p1Badge = CreateCornerBadge(rt, "P1_Badge", new Vector2(0f, 1f), new Vector2(26f, -18f), p1SelectedColor, "P1", out TextMeshProUGUI p1Txt, out Image p1Bg);
-            GameObject p2Badge = CreateCornerBadge(rt, "P2_Badge", new Vector2(1f, 1f), new Vector2(-26f, -18f), p2SelectedColor, "P2", out TextMeshProUGUI p2Txt, out Image p2Bg);
+            GameObject p1Badge = CreateCornerBadge(rt, "P1_Badge", new Vector2(0f, 1f), new Vector2(18f, -12f), p1SelectedColor, "P1", out Image p1Bg);
+            GameObject p2Badge = CreateCornerBadge(rt, "P2_Badge", new Vector2(1f, 1f), new Vector2(-18f, -12f), p2SelectedColor, "P2", out Image p2Bg);
 
             if (!slotImage.TryGetComponent(out Shadow shadow))
             {
                 shadow = slotImage.gameObject.AddComponent<Shadow>();
             }
-            shadow.effectColor = new Color(0f, 0f, 0f, 0.8f);
-            shadow.effectDistance = new Vector2(4f, -4f);
+            shadow.effectColor = new Color(0f, 0f, 0f, 0.72f);
+            shadow.effectDistance = new Vector2(3f, -3f);
 
             return new MapSlotBorderVisual
             {
@@ -412,12 +380,9 @@ namespace GameProject.Runtime.Manager
                 leftBorder = left,
                 rightBorder = right,
                 p1BadgeObj = p1Badge,
-                p1BadgeText = p1Txt,
                 p1BadgeBg = p1Bg,
                 p2BadgeObj = p2Badge,
-                p2BadgeText = p2Txt,
-                p2BadgeBg = p2Bg,
-                mapTitleLabel = titleTmp
+                p2BadgeBg = p2Bg
             };
         }
 
@@ -443,7 +408,6 @@ namespace GameProject.Runtime.Manager
             Vector2 anchoredPos,
             Color bgColor,
             string text,
-            out TextMeshProUGUI label,
             out Image bgImage)
         {
             GameObject badgeObj = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
@@ -454,7 +418,7 @@ namespace GameProject.Runtime.Manager
             rt.anchorMax = anchor;
             rt.pivot = new Vector2(0.5f, 0.5f);
             rt.anchoredPosition = anchoredPos;
-            rt.sizeDelta = new Vector2(44f, 26f);
+            rt.sizeDelta = new Vector2(32f, 20f);
 
             bgImage = badgeObj.GetComponent<Image>();
             bgImage.color = bgColor;
@@ -468,10 +432,10 @@ namespace GameProject.Runtime.Manager
             txtRect.offsetMin = Vector2.zero;
             txtRect.offsetMax = Vector2.zero;
 
-            label = txtObj.GetComponent<TextMeshProUGUI>();
+            TextMeshProUGUI label = txtObj.GetComponent<TextMeshProUGUI>();
             if (p1MapNameText != null) label.font = p1MapNameText.font;
             label.text = text;
-            label.fontSize = 18f;
+            label.fontSize = 14f;
             label.fontStyle = FontStyles.Bold;
             label.color = Color.white;
             label.alignment = TextAlignmentOptions.Center;
@@ -484,22 +448,13 @@ namespace GameProject.Runtime.Manager
         {
             if (matchSpawner == null) return;
 
-            BindPreviewRigToCharacter(p1FighterPreviewRig, matchSpawner.SelectedP1Character, p1SelectedColor);
-            BindPreviewRigToCharacter(p2FighterPreviewRig, matchSpawner.SelectedP2Character, p2SelectedColor);
+            BindPreviewRigToCharacter(p1FighterPreviewRig, matchSpawner.SelectedP1Character);
+            BindPreviewRigToCharacter(p2FighterPreviewRig, matchSpawner.SelectedP2Character);
         }
 
-        private void BindPreviewRigToCharacter(CharacterPreviewRig rig, CharacterData data, Color accentColor)
+        private void BindPreviewRigToCharacter(CharacterPreviewRig rig, CharacterData data)
         {
             if (rig == null || data == null) return;
-
-            if (rig.portraitBadgeImage != null)
-                rig.portraitBadgeImage.sprite = data.portrait;
-
-            if (rig.portraitFrameImage != null)
-                rig.portraitFrameImage.color = accentColor;
-
-            if (rig.pedestalGlowImage != null)
-                rig.pedestalGlowImage.color = new Color(accentColor.r, accentColor.g, accentColor.b, 0.55f);
 
             Sprite fallbackSprite = data.previewSprite != null ? data.previewSprite : data.portrait;
             RuntimeAnimatorController controller = data.animatorController;
@@ -546,23 +501,21 @@ namespace GameProject.Runtime.Manager
             if (label == null) return;
             label.color = defaultColor;
             label.fontStyle = FontStyles.Bold;
-            label.richText = true;
+            label.richText = false;
             label.enableWordWrapping = false;
             label.overflowMode = TextOverflowModes.Overflow;
 
-            if (!label.TryGetComponent(out Outline outline))
+            if (label.TryGetComponent(out Outline outline))
             {
-                outline = label.gameObject.AddComponent<Outline>();
+                outline.enabled = false;
             }
-            outline.effectColor = new Color(0f, 0f, 0f, 0.94f);
-            outline.effectDistance = new Vector2(2f, -2f);
 
             if (!label.TryGetComponent(out Shadow shadow))
             {
                 shadow = label.gameObject.AddComponent<Shadow>();
             }
-            shadow.effectColor = new Color(0f, 0f, 0f, 0.88f);
-            shadow.effectDistance = new Vector2(3f, -3f);
+            shadow.effectColor = new Color(0f, 0f, 0f, 0.85f);
+            shadow.effectDistance = new Vector2(2f, -2f);
         }
 
         private void ClearChildren(Transform panel)
@@ -632,15 +585,13 @@ namespace GameProject.Runtime.Manager
 
         private void AnimateSlotScales()
         {
-            float dt = Time.unscaledDeltaTime * 12f;
-            float pulse = 1f + Mathf.Sin(Time.unscaledTime * 6f) * 0.025f;
+            float dt = Time.unscaledDeltaTime * 14f;
 
             for (int i = 0; i < mapSlots.Count; i++)
             {
                 if (mapSlots[i] == null || mapSlots[i].rootRect == null) continue;
                 bool isHovered = (i == p1MapIndex || i == p2MapIndex);
-                bool isBoth = (i == p1MapIndex && i == p2MapIndex);
-                float targetScale = isBoth ? 1.12f * pulse : (isHovered ? 1.08f * pulse : 0.94f);
+                float targetScale = isHovered ? 1.04f : 1.0f;
 
                 RectTransform rt = mapSlots[i].rootRect;
                 rt.localScale = Vector3.Lerp(rt.localScale, new Vector3(targetScale, targetScale, 1f), dt);
@@ -713,9 +664,9 @@ namespace GameProject.Runtime.Manager
 
         private void UpdateMapSelectionUI()
         {
-            Color inactiveBorder = new Color(0.16f, 0.19f, 0.26f, 0.9f);
-            Color activeP1Color = p1MapLocked ? Color.Lerp(p1SelectedColor, lockedColor, 0.35f) : p1SelectedColor;
-            Color activeP2Color = p2MapLocked ? Color.Lerp(p2SelectedColor, lockedColor, 0.35f) : p2SelectedColor;
+            Color inactiveBorder = new Color(0.22f, 0.24f, 0.28f, 0.85f);
+            Color activeP1Color = p1MapLocked ? Color.Lerp(p1SelectedColor, lockedColor, 0.30f) : p1SelectedColor;
+            Color activeP2Color = p2MapLocked ? Color.Lerp(p2SelectedColor, lockedColor, 0.30f) : p2SelectedColor;
 
             for (int i = 0; i < mapSlots.Count; i++)
             {
@@ -725,7 +676,6 @@ namespace GameProject.Runtime.Manager
                 bool isP1Hovered = (i == p1MapIndex);
                 bool isP2Hovered = (i == p2MapIndex);
 
-                // Harita görselini komple boyamak yerine doğal renginde bırakıyoruz
                 slot.mapImage.color = (isP1Hovered || isP2Hovered) ? highlightedColor : unselectedColor;
 
                 if (isP1Hovered && isP2Hovered)
@@ -760,14 +710,12 @@ namespace GameProject.Runtime.Manager
                 if (slot.p1BadgeObj != null)
                 {
                     slot.p1BadgeObj.SetActive(isP1Hovered);
-                    if (slot.p1BadgeText != null) slot.p1BadgeText.text = p1MapLocked ? "P1✓" : "P1";
                     if (slot.p1BadgeBg != null) slot.p1BadgeBg.color = activeP1Color;
                 }
 
                 if (slot.p2BadgeObj != null)
                 {
                     slot.p2BadgeObj.SetActive(isP2Hovered);
-                    if (slot.p2BadgeText != null) slot.p2BadgeText.text = p2MapLocked ? "P2✓" : "P2";
                     if (slot.p2BadgeBg != null) slot.p2BadgeBg.color = activeP2Color;
                 }
             }
@@ -785,35 +733,36 @@ namespace GameProject.Runtime.Manager
 
                 if (centerArenaBannerText != null)
                 {
-                    if (p1MapIndex == p2MapIndex)
-                        centerArenaBannerText.text = p1MapName;
-                    else
-                        centerArenaBannerText.text = $"<color=#45B6FE>{p1MapName}</color>  <size=75%><color=#FFD147>VS</color></size>  <color=#FF4757>{p2MapName}</color>";
+                    centerArenaBannerText.text = (p1MapIndex == p2MapIndex)
+                        ? p1MapName
+                        : $"{p1MapName}  /  {p2MapName}";
                 }
 
                 if (p1MapNameText != null)
                 {
-                    p1MapNameText.text = $"<size=56%><color=#45B6FE>P1 • {p1CharName}</color></size>\n{p1MapName}";
+                    p1MapNameText.text = p1CharName;
                 }
 
                 if (p2MapNameText != null)
                 {
-                    p2MapNameText.text = $"<size=56%><color=#FF4757>P2 • {p2CharName}</color></size>\n{p2MapName}";
+                    p2MapNameText.text = p2CharName;
                 }
             }
 
             if (p1ReadyText != null)
             {
-                p1ReadyText.text = p1MapLocked
-                    ? "<color=#38F27B>★ READY! ★</color> <size=52%><color=#B0BEC5>([K] İptal)</color></size>"
-                    : "<size=54%><color=#CFD8DC>[A/D] Seç  •  [J / Space] Onayla</color></size>";
+                p1ReadyText.text = p1MapLocked ? "READY" : "A / D  •  J";
+                p1ReadyText.color = p1MapLocked
+                    ? new Color(0.95f, 0.82f, 0.35f, 1f)
+                    : new Color(0.62f, 0.65f, 0.70f, 0.9f);
             }
 
             if (p2ReadyText != null)
             {
-                p2ReadyText.text = p2MapLocked
-                    ? "<color=#38F27B>★ READY! ★</color> <size=52%><color=#B0BEC5>([Num2] İptal)</color></size>"
-                    : "<size=54%><color=#CFD8DC>[←/→] Seç  •  [Enter / Num1] Onayla</color></size>";
+                p2ReadyText.text = p2MapLocked ? "READY" : "← / →  •  ENTER";
+                p2ReadyText.color = p2MapLocked
+                    ? new Color(0.95f, 0.82f, 0.35f, 1f)
+                    : new Color(0.62f, 0.65f, 0.70f, 0.9f);
             }
         }
 

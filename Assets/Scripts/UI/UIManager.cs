@@ -34,6 +34,12 @@ namespace GameProject.Runtime.Manager
         private TextMeshProUGUI pressToStartLabel;
         private bool menusStyled = false;
 
+        private static readonly Color WarmIvoryColor = new Color(0.92f, 0.88f, 0.76f, 1f);
+        private static readonly Color ButtonFillColor = new Color(0.11f, 0.12f, 0.15f, 0.94f);
+        private static readonly Color ButtonBorderColor = new Color(0.78f, 0.70f, 0.50f, 0.45f);
+        private static readonly Color ButtonHoverBorderColor = new Color(0.94f, 0.86f, 0.65f, 0.85f);
+        private static readonly Color ButtonLabelColor = new Color(0.94f, 0.94f, 0.96f, 1f);
+
         private void Awake()
         {
             if (Instance == null) Instance = this;
@@ -58,19 +64,18 @@ namespace GameProject.Runtime.Manager
 
         private void Update()
         {
-            // Başlangıç ekranında yazıyı nefes alır gibi parlat ve klavyeden Space/Enter ile geçişe izin ver
+            // Başlangıç ekranında yazıda yumuşak saydamlık nefesi ve herhangi bir tuşla geçiş
             if (firstStartScreenUI != null && firstStartScreenUI.activeInHierarchy)
             {
                 if (pressToStartLabel != null)
                 {
-                    float pulse = 0.55f + 0.45f * Mathf.Sin(Time.unscaledTime * 3.5f);
-                    pressToStartLabel.color = new Color(1f, 0.86f, 0.35f, pulse);
-                    float scale = 1f + Mathf.Sin(Time.unscaledTime * 3.5f) * 0.04f;
-                    pressToStartLabel.rectTransform.localScale = new Vector3(scale, scale, 1f);
+                    float alpha = 0.45f + 0.55f * (0.5f + 0.5f * Mathf.Sin(Time.unscaledTime * 2.6f));
+                    pressToStartLabel.color = new Color(WarmIvoryColor.r, WarmIvoryColor.g, WarmIvoryColor.b, alpha);
+                    pressToStartLabel.rectTransform.localScale = Vector3.one;
                 }
 
                 Keyboard kb = Keyboard.current;
-                if (kb != null && (kb.spaceKey.wasPressedThisFrame || kb.enterKey.wasPressedThisFrame))
+                if (kb != null && kb.anyKey.wasPressedThisFrame)
                 {
                     ShowPlayModeSelection();
                 }
@@ -130,7 +135,7 @@ namespace GameProject.Runtime.Manager
 
             if (gameObject.activeInHierarchy)
             {
-                StartCoroutine(FadeCanvasGroupRoutine(cg, 0.18f));
+                StartCoroutine(FadeCanvasGroupRoutine(cg, 0.16f));
             }
             else
             {
@@ -184,43 +189,20 @@ namespace GameProject.Runtime.Manager
 
             if (firstStartScreenUI.TryGetComponent(out Image bg))
             {
-                bg.color = new Color(0.05f, 0.06f, 0.10f, 0.96f);
+                bg.color = new Color(0.05f, 0.05f, 0.07f, 0.96f);
             }
 
             TextMeshProUGUI[] texts = firstStartScreenUI.GetComponentsInChildren<TextMeshProUGUI>(true);
             if (texts.Length > 0)
             {
                 pressToStartLabel = texts[0];
-                pressToStartLabel.richText = true;
-                pressToStartLabel.text = "PRESS ANY KEY OR CLICK TO START";
-                pressToStartLabel.color = new Color(1f, 0.86f, 0.35f, 1f);
+                pressToStartLabel.richText = false;
+                pressToStartLabel.enableAutoSizing = false;
+                pressToStartLabel.fontSize = 32f;
+                pressToStartLabel.text = "PRESS ANY KEY TO START";
+                pressToStartLabel.color = WarmIvoryColor;
                 pressToStartLabel.fontStyle = FontStyles.Bold;
                 DecorateText(pressToStartLabel.gameObject);
-            }
-
-            // Üst kısma oyun başlığı ekle (yoksa)
-            if (firstStartScreenUI.transform.Find("GameTitleHeader") == null && pressToStartLabel != null)
-            {
-                GameObject titleObj = new GameObject("GameTitleHeader", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
-                titleObj.transform.SetParent(firstStartScreenUI.transform, false);
-
-                RectTransform rt = titleObj.GetComponent<RectTransform>();
-                rt.anchorMin = new Vector2(0.5f, 0.68f);
-                rt.anchorMax = new Vector2(0.5f, 0.68f);
-                rt.pivot = new Vector2(0.5f, 0.5f);
-                rt.anchoredPosition = Vector2.zero;
-                rt.sizeDelta = new Vector2(1200f, 220f);
-
-                TextMeshProUGUI titleText = titleObj.GetComponent<TextMeshProUGUI>();
-                titleText.font = pressToStartLabel.font;
-                titleText.richText = true;
-                titleText.alignment = TextAlignmentOptions.Center;
-                titleText.fontStyle = FontStyles.Bold;
-                titleText.fontSize = 92f;
-                titleText.color = new Color(1f, 0.84f, 0.25f, 1f);
-                titleText.text = "SANCAR <color=#FF3B4E>011</color>\n<size=36%><color=#CFD8DC>ARENA FIGHTER</color></size>";
-                titleText.raycastTarget = false;
-                DecorateText(titleObj);
             }
         }
 
@@ -230,16 +212,18 @@ namespace GameProject.Runtime.Manager
 
             if (playModeSelectionScreenUI.TryGetComponent(out Image bg))
             {
-                bg.color = new Color(0.05f, 0.06f, 0.10f, 0.96f);
+                bg.color = new Color(0.05f, 0.05f, 0.07f, 0.96f);
             }
 
-            // Mevcut başlığı ("Select A Path") düzenle
             TextMeshProUGUI[] screenTexts = playModeSelectionScreenUI.GetComponentsInChildren<TextMeshProUGUI>(true);
             for (int i = 0; i < screenTexts.Length; i++)
             {
                 if (screenTexts[i].GetComponentInParent<Button>() != null) continue;
+                screenTexts[i].richText = false;
+                screenTexts[i].enableAutoSizing = false;
+                screenTexts[i].fontSize = 42f;
                 screenTexts[i].text = "SELECT GAME MODE";
-                screenTexts[i].color = new Color(1f, 0.84f, 0.28f, 1f);
+                screenTexts[i].color = new Color(0.92f, 0.88f, 0.78f, 1f);
                 screenTexts[i].fontStyle = FontStyles.Bold;
                 DecorateText(screenTexts[i].gameObject);
             }
@@ -247,9 +231,7 @@ namespace GameProject.Runtime.Manager
             Button[] buttons = playModeSelectionScreenUI.GetComponentsInChildren<Button>(true);
             for (int i = 0; i < buttons.Length; i++)
             {
-                bool isMulti = buttons[i].name.Contains("Multi");
-                Color accent = isMulti ? new Color(1f, 0.28f, 0.34f, 1f) : new Color(0.25f, 0.72f, 1f, 0.65f);
-                StyleArcadeButton(buttons[i], new Color(0.10f, 0.12f, 0.19f, 0.96f), accent);
+                StyleArcadeButton(buttons[i], ButtonFillColor, ButtonBorderColor);
             }
         }
 
@@ -259,19 +241,13 @@ namespace GameProject.Runtime.Manager
 
             if (pvpMatchOverScreenUI.TryGetComponent(out Image bg))
             {
-                bg.color = new Color(0.04f, 0.05f, 0.09f, 0.84f);
+                bg.color = new Color(0.04f, 0.04f, 0.06f, 0.86f);
             }
 
             Button[] buttons = pvpMatchOverScreenUI.GetComponentsInChildren<Button>(true);
             for (int i = 0; i < buttons.Length; i++)
             {
-                Color accent = new Color(0.95f, 0.78f, 0.25f, 1f);
-                if (buttons[i].name.Contains("Revenge"))
-                    accent = new Color(1f, 0.28f, 0.34f, 1f);
-                else if (buttons[i].name.Contains("Character"))
-                    accent = new Color(0.25f, 0.72f, 1f, 1f);
-
-                StyleArcadeButton(buttons[i], new Color(0.10f, 0.12f, 0.18f, 0.96f), accent);
+                StyleArcadeButton(buttons[i], ButtonFillColor, ButtonBorderColor);
             }
         }
 
@@ -286,10 +262,10 @@ namespace GameProject.Runtime.Manager
 
             ColorBlock cb = btn.colors;
             cb.normalColor = Color.white;
-            cb.highlightedColor = new Color(1.15f, 1.15f, 1.15f, 1f);
-            cb.pressedColor = new Color(0.82f, 0.82f, 0.82f, 1f);
+            cb.highlightedColor = new Color(1.10f, 1.10f, 1.10f, 1f);
+            cb.pressedColor = new Color(0.84f, 0.84f, 0.84f, 1f);
             cb.selectedColor = Color.white;
-            cb.disabledColor = new Color(0.55f, 0.58f, 0.65f, 0.65f);
+            cb.disabledColor = new Color(0.55f, 0.58f, 0.64f, 0.65f);
             cb.fadeDuration = 0.08f;
             btn.colors = cb;
 
@@ -298,19 +274,19 @@ namespace GameProject.Runtime.Manager
                 outline = btn.gameObject.AddComponent<Outline>();
             }
             outline.effectColor = borderAccent;
-            outline.effectDistance = new Vector2(2.5f, -2.5f);
+            outline.effectDistance = new Vector2(1.5f, -1.5f);
 
             if (!btn.TryGetComponent(out Shadow shadow))
             {
                 shadow = btn.gameObject.AddComponent<Shadow>();
             }
-            shadow.effectColor = new Color(0f, 0f, 0f, 0.85f);
-            shadow.effectDistance = new Vector2(5f, -5f);
+            shadow.effectColor = new Color(0f, 0f, 0f, 0.78f);
+            shadow.effectDistance = new Vector2(3.5f, -3.5f);
 
             TextMeshProUGUI tmpLabel = btn.GetComponentInChildren<TextMeshProUGUI>(true);
             if (tmpLabel != null)
             {
-                tmpLabel.color = new Color(0.96f, 0.97f, 1f, 1f);
+                tmpLabel.color = ButtonLabelColor;
                 tmpLabel.fontStyle = FontStyles.Bold;
                 tmpLabel.text = tmpLabel.text.ToUpperInvariant();
                 DecorateText(tmpLabel.gameObject);
@@ -319,8 +295,8 @@ namespace GameProject.Runtime.Manager
             Text legacyLabel = btn.GetComponentInChildren<Text>(true);
             if (legacyLabel != null)
             {
-                legacyLabel.color = btn.interactable ? new Color(1f, 0.92f, 0.65f, 1f) : new Color(0.65f, 0.68f, 0.74f, 0.8f);
-                legacyLabel.fontStyle = FontStyle.Bold;
+                legacyLabel.color = btn.interactable ? ButtonLabelColor : new Color(0.60f, 0.62f, 0.68f, 0.75f);
+                legacyLabel.fontStyle = (FontStyle)FontStyles.Bold;
                 DecorateText(legacyLabel.gameObject);
             }
 
@@ -342,8 +318,8 @@ namespace GameProject.Runtime.Manager
             EventTrigger.Entry enterEntry = new EventTrigger.Entry { eventID = EventTriggerType.PointerEnter };
             enterEntry.callback.AddListener((_) =>
             {
-                if (rt != null) rt.localScale = new Vector3(1.06f, 1.06f, 1f);
-                if (outline != null) outline.effectColor = new Color(1f, 0.88f, 0.35f, 1f);
+                if (rt != null) rt.localScale = new Vector3(1.03f, 1.03f, 1f);
+                if (outline != null) outline.effectColor = ButtonHoverBorderColor;
             });
             trigger.triggers.Add(enterEntry);
 
@@ -359,19 +335,17 @@ namespace GameProject.Runtime.Manager
         private void DecorateText(GameObject textObj)
         {
             if (textObj == null) return;
-            if (!textObj.TryGetComponent(out Outline outline))
+            if (textObj.TryGetComponent(out Outline outline))
             {
-                outline = textObj.AddComponent<Outline>();
+                outline.enabled = false;
             }
-            outline.effectColor = new Color(0f, 0f, 0f, 0.92f);
-            outline.effectDistance = new Vector2(1.8f, -1.8f);
 
             if (!textObj.TryGetComponent(out Shadow shadow))
             {
                 shadow = textObj.AddComponent<Shadow>();
             }
             shadow.effectColor = new Color(0f, 0f, 0f, 0.85f);
-            shadow.effectDistance = new Vector2(3f, -3f);
+            shadow.effectDistance = new Vector2(2f, -2f);
         }
 
         public void ShowPlayModeSelection() => GameManager.instance.SetGameState(EGameState.PLAYMODESELECTION);
